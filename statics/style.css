@@ -1,0 +1,86 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background-color: #f7faf7;
+    color: #333;
+}
+
+nav {
+    background-color: white;
+    padding: 15px 8%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+nav h2 {
+    color: #218c57;
+}
+
+nav a {
+    color: #333;
+    text-decoration: none;
+}
+
+.welcome {
+    text-align: center;
+    padding: 80px 20px;
+    background-color: #e8f5e9;
+}
+
+.welcome h1 {
+    font-size: 38px;
+    color: #176b43;
+}
+
+.welcome p {
+    font-size: 18px;
+    line-height: 1.6;
+}
+
+.button {
+    display: inline-block;
+    padding: 12px 25px;
+    margin-top: 20px;
+    background-color: #218c57;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+}
+
+.features {
+    padding: 40px 8%;
+    text-align: center;
+}
+
+.cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    width: 240px;
+    border-radius: 12px;
+    box-shadow: 0 3px 12px #ddd;
+    text-align: left;
+}
+
+.card h3 {
+    color: #218c57;
+}
+
+.card p {
+    line-height: 1.5;
+}
+
+.card a {
+    color: #218c57;
+}
+
+.card span {
+    color: #777;
+}
