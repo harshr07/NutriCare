@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - NutriCare</title>
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <main class="bmi-container">
+        <h1>BMI Calculator</h1>
+        <p>Enter your height and weight to check your BMI.</p>
+
+        <form method="POST">
+            <label>Weight (kg)</label>
+            <input type="number" name="weight"
+                   step="any" min="0.1" required>
+
+            <label>Height (cm)</label>
+            <input type="number" name="height"
+                   step="any" min="0.1" required>
+
+            <button type="submit">Calculate BMI</button>
+        </form>
+
+        {% if bmi is not none %}
+            <div class="result">
+                <h2>Your BMI: {{ bmi }}</h2>
+                <p>Category: {{ category }}</p>
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+
+        <p class="note">
+            BMI is a screening tool for adults,
+            not a medical diagnosis.
+        </p>
+
+        <a href="/">Back to Home</a>
+    </main>
+
+</body>
+</html>
