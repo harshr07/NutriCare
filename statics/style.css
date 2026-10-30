@@ -84,3 +84,46 @@ nav a {
 .card span {
     color: #777;
 }
+
+
+.bmi-container {
+    max-width: 500px;
+    margin: 60px auto;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px #ddd;
+}
+
+.bmi-container input {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 12px;
+    margin: 10px 0 20px;
+}
+
+.bmi-container button {
+    background: #218c57;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.result {
+    background: #e8f5e9;
+    padding: 15px;
+    margin-top: 20px;
+    border-radius: 10px;
+}
+
+.error {
+    color: #c62828;
+}
+
+.note {
+    color: #666;
+    font-size: 13px;
+}
