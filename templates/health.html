@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Health | NutriCare</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='health.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header><a href="/">🌿 NutriCare</a><span>My Health</span></header>
+  <main>
+    <h1>Your health, one day at a time</h1>
+    <p class="muted">Add your daily numbers and see how they change over time.</p>
+    <section class="panel">
+      <h2>Add today's record</h2>
+      <form action="{{ url_for('health.save_health_log') }}" method="post" class="form-grid">
+        <label>Date<input name="date" type="date" value="{{ today }}" max="{{ today }}" required></label>
+        <label>Weight (kg)<input name="weight" type="number" min="1" max="500" step="0.1" placeholder="e.g. 75"></label>
+        <label>Water (litres)<input name="water" type="number" min="0" max="20" step="0.1" placeholder="e.g. 2.5"></label>
+        <label>Sleep (hours)<input name="sleep" type="number" min="0" max="24" step="0.1" placeholder="e.g. 7.5"></label>
+        <label>Steps walked<input name="steps" type="number" min="0" max="100000" placeholder="e.g. 6000"></label>
+        <label>Calories eaten (optional)<input name="calories" type="number" min="0" max="20000" placeholder="e.g. 2200"></label>
+        <button type="submit">Save record</button>
+      </form>
+      <p class="muted small">You can leave measurements empty. Enter at least one value. Only one log per date.</p>
+    </section>
+    <nav class="filters"><span>View progress:</span><a class="{{ 'active' if days == 7 else '' }}" href="?days=7">7 days</a><a class="{{ 'active' if days == 30 else '' }}" href="?days=30">30 days</a><a href="{{ url_for('health.export_health_data') }}">Download CSV</a></nav>
+    <section class="summary">
+      <div class="tile"><small>Latest weight</small><strong>{{ stats.weight if stats.weight is not none else '—' }}</strong><span>kg</span></div>
+      <div class="tile"><small>Average water</small><strong>{{ stats.water if stats.water is not none else '—' }}</strong><span>litres/day logged</span></div>
+      <div class="tile"><small>Average sleep</small><strong>{{ stats.sleep if stats.sleep is not none else '—' }}</strong><span>hours/day logged</span></div>
+      <div class="tile"><small>Days recorded</small><strong>{{ stats.logged_days }}</strong><span>out of {{ days }}</span></div>
+    </section>
+    {% if records %}
+      <section class="panel"><h2>Your progress</h2><div class="chart-grid">
+        <div><h3>Weight</h3><canvas id="weightChart"></canvas></div>
+        <div><h3>Water</h3><canvas id="waterChart"></canvas></div>
+        <div><h3>Sleep</h3><canvas id="sleepChart"></canvas></div>
+        <div><h3>Steps</h3><canvas id="stepsChart"></canvas></div>
+      </div></section>
+      <section class="panel"><h2>Small insights</h2>
+        <p>You recorded health data on {{ stats.logged_days }} of the last {{ days }} days.</p>
+        {% if stats.weight_change is not none %}<p>Your recorded weight changed by {{ stats.weight_change }} kg between your first and last recorded weights in this period.</p>{% endif %}
+      </section>
+      <section class="panel"><h2>Previous records</h2>
+        {% for item in records|reverse %}
+          <details><summary>{{ item.date }} — Click to edit</summary>
+            <form method="post" action="{{ url_for('health.update_health_log', log_id=item.id) }}" class="form-grid">
+              <label>Date<input name="date" type="date" max="{{ today }}" value="{{ item.date }}" required></label>
+              <label>Weight<input name="weight" type="number" step="0.1" min="1" max="500" value="{{ item.weight if item.weight is not none else '' }}"></label>
+              <label>Water<input name="water" type="number" step="0.1" min="0" max="20" value="{{ item.water if item.water is not none else '' }}"></label>
+              <label>Sleep<input name="sleep" type="number" step="0.1" min="0" max="24" value="{{ item.sleep if item.sleep is not none else '' }}"></label>
+              <label>Steps<input name="steps" type="number" min="0" max="100000" value="{{ item.steps if item.steps is not none else '' }}"></label>
+              <label>Calories<input name="calories" type="number" min="0" max="20000" value="{{ item.calories if item.calories is not none else '' }}"></label>
+              <button type="submit">Save changes</button>
+            </form>
+            <form action="{{ url_for('health.delete_health_log', log_id=item.id) }}" method="post" onsubmit="return confirm('Delete this record?')"><button type="submit" class="danger">Delete record</button></form>
+          </details>
+        {% endfor %}
+      </section>
+    {% else %}
+      <section class="panel"><h2>No records yet</h2><p>Add your first daily record above to see your progress here.</p></section>
+    {% endif %}
+    <p class="muted small">This is a personal logging demo, not medical advice. Do not enter real sensitive health records before authentication and access protection are connected.</p>
+  </main>
+  {% if records %}<script>
+    const healthRecords = {{ records | tojson }};
+    const days = healthRecords.map(item => item.date);
+    function drawChart(id, key, label, kind) {
+      new Chart(document.getElementById(id), {
+        type: kind,
+        data: {labels: days, datasets: [{label: label, data: healthRecords.map(item => item[key]), borderColor: '#23865b', backgroundColor: '#a8dec0', tension: 0.2}]},
+        options: {responsive: true, scales: {y: {beginAtZero: kind === 'bar'}}}
+      });
+    }
+    drawChart('weightChart', 'weight', 'Weight (kg)', 'line');
+    drawChart('waterChart', 'water', 'Water (litres)', 'bar');
+    drawChart('sleepChart', 'sleep', 'Sleep (hours)', 'line');
+    drawChart('stepsChart', 'steps', 'Steps', 'bar');
+  </script>{% endif %}
+</body>
+</html>

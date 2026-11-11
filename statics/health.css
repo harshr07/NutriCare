@@ -1,0 +1,194 @@
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background-color: #f7faf6;
+    color: #20352a;
+    font-family: Arial, sans-serif;
+    line-height: 1.5;
+}
+
+/* Header */
+
+header {
+    background-color: white;
+    border-bottom: 1px solid #e0e7e1;
+    padding: 16px 6%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+}
+
+header a {
+    color: #23865b;
+    text-decoration: none;
+}
+
+/* Main content */
+
+main {
+    max-width: 1050px;
+    margin: 32px auto;
+    padding: 0 16px;
+}
+
+h1 {
+    margin-bottom: 4px;
+}
+
+h2 {
+    font-size: 21px;
+}
+
+.muted {
+    color: #66776b;
+}
+
+.small {
+    font-size: 13px;
+}
+
+/* White sections */
+
+.panel {
+    background-color: white;
+    padding: 24px;
+    margin: 22px 0;
+    border-radius: 15px;
+    box-shadow: 0 2px 12px #1a553311;
+}
+
+/* Daily health form */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+label {
+    font-size: 14px;
+    font-weight: bold;
+}
+
+input {
+    width: 100%;
+    display: block;
+    margin-top: 7px;
+    padding: 11px;
+    font-size: 15px;
+    border: 1px solid #d1ddd4;
+    border-radius: 8px;
+}
+
+/* Buttons */
+
+button,
+.filters a {
+    background-color: #23865b;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    padding: 12px 16px;
+    font-weight: bold;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #1b6c49;
+}
+
+/* Weekly and monthly filters */
+
+.filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.filters a {
+    background-color: #e4f2e9;
+    color: #236e4c;
+}
+
+.filters a.active {
+    background-color: #23865b;
+    color: white;
+}
+
+/* Health summary cards */
+
+.summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.tile {
+    background-color: white;
+    padding: 19px;
+    border-radius: 12px;
+}
+
+.tile small,
+.tile span {
+    display: block;
+    color: #6a776e;
+}
+
+.tile strong {
+    font-size: 30px;
+}
+
+/* Progress charts */
+
+.chart-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 25px;
+}
+
+.chart-grid > div {
+    min-width: 0;
+}
+
+/* Previous health records */
+
+details {
+    border-top: 1px solid #e0e7e1;
+    padding: 12px 0;
+}
+
+summary {
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.danger {
+    background-color: #b13d3d;
+    margin-top: 10px;
+}
+
+.danger:hover {
+    background-color: #922e2e;
+}
+
+/* Mobile screen */
+
+@media (max-width: 650px) {
+
+    .form-grid,
+    .chart-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .summary {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

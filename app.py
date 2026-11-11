@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request
+from health import health_bp
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="statics")
+
+app.register_blueprint(health_bp)
 
 
 # Homepage
