@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Daily Nutrition | NutriCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='nutrition_dashboard.css') }}">
+</head>
+<body>
+<header>
+    <a class="brand" href="/"> NutriCare</a>
+    <nav><a href="/health">My Health</a><a href="{{ url_for('nutrition.dashboard') }}">Nutrition Log</a></nav>
+</header>
+<main>
+    <div class="page-title">
+        <div>
+            <h1>What did you eat today?</h1>
+            <p class="muted">Add a food and its nutrition-label values. NutriCare calculates the amount you actually ate.</p>
+        </div>
+    </div>
+
+    <section class="panel">
+        <h2>Choose a day</h2>
+        <form action="{{ url_for('nutrition.dashboard') }}" method="get" class="date-form">
+            <label for="view-date">Date</label>
+            <input id="view-date" type="date" name="date" value="{{ selected_date }}" max="{{ today }}">
+            <button type="submit">Show day</button>
+        </form>
+    </section>
+
+    <section class="panel">
+        <h2>Today's nutrition so far</h2>
+        <p class="muted small">Known amounts from your logged foods only. Unreported nutrients show a dash (—), not zero.</p>
+        <div class="summary-grid">
+            {% for key in ['calories', 'protein', 'carbs', 'fat'] %}
+            <div class="summary-card">
+                <span>{{ nutrients[key][0] }}</span>
+                <strong>{{ totals[key] if totals[key] is not none else '—' }}</strong>
+                <small>{{ nutrients[key][1] }}</small>
+            </div>
+            {% endfor %}
+        </div>
+        <h3>Other nutrients</h3>
+        <div class="nutrient-grid">
+            {% for key in ['fiber','sugar','added_sugar','saturated_fat','sodium','potassium','calcium','iron','vitamin_a','vitamin_c','vitamin_d','vitamin_b12'] %}
+            <div class="nutrient-item">
+                <span>{{ nutrients[key][0] }}</span>
+                <strong>{{ totals[key] if totals[key] is not none else '—' }} {{ nutrients[key][1] if totals[key] is not none else '' }}</strong>
+            </div>
+            {% endfor %}
+            <div class="nutrient-item">
+                <span>Recorded food spending</span>
+                <strong>{{ '₹' ~ totals.cost_rupees if totals.cost_rupees is not none else '—' }}</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="panel" id="add-food">
+        <h2>Add a food</h2>
+        <p class="muted small">For a packet, enter exactly what the label says. For rice/dal/sabzi, use verified nutritional values for a defined serving. Leave unknown values blank.</p>
+        {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+        <form action="{{ url_for('nutrition.add') }}" method="post">
+            <div class="form-grid">
+                <label>Food name
+                    <input name="food_name" placeholder="e.g. Roasted chana" maxlength="120" required>
+                </label>
+                <label>Date eaten
+                    <input type="date" name="entry_date" value="{{ selected_date }}" max="{{ today }}" required>
+                </label>
+                <label>Food type
+                    <select name="food_type" required>
+                        <option value="packaged">Packaged / outside food</option>
+                        <option value="homemade">Homemade / mess food</option>
+                    </select>
+                </label>
+                <label>Quantity you ate (grams)
+                    <input type="number" name="quantity_g" min="0.1" max="10000" step="any" placeholder="e.g. 45" required>
+                </label>
+                <label>Nutrition values are given per
+                    <select name="label_basis" id="label-basis">
+                        <option value="100g">100 grams</option>
+                        <option value="serving">One serving</option>
+                    </select>
+                </label>
+                <label id="serving-group" class="hidden">One serving weighs (grams)
+                    <input type="number" name="serving_g" id="serving-size" min="0.1" max="10000" step="any" placeholder="e.g. 30">
+                </label>
+                <label>Price of portion eaten (₹) — optional
+                    <input type="number" name="cost_rupees" min="0" step="any" placeholder="e.g. 15">
+                </label>
+                <label>Label / data source — optional
+                    <input name="source" placeholder="e.g. Product label, IFCT table" maxlength="200">
+                </label>
+            </div>
+
+            <h3>Numbers from the label or food database</h3>
+            <p class="muted small">Use kcal for energy; g for macros/fiber/sugar; mg or µg for minerals and vitamins as marked.</p>
+            <div class="form-grid">
+                {% for field in common %}
+                <label>{{ nutrients[field][0] }} ({{ nutrients[field][1] }})
+                    <input type="number" name="{{ field }}" min="0" max="100000" step="any" placeholder="Not provided">
+                </label>
+                {% endfor %}
+            </div>
+            <details>
+                <summary>More vitamins and minerals (optional)</summary>
+                <div class="form-grid details-grid">
+                    {% for field in extra %}
+                    <label>{{ nutrients[field][0] }} ({{ nutrients[field][1] }})
+                        <input type="number" name="{{ field }}" min="0" max="100000" step="any" placeholder="Not provided">
+                    </label>
+                    {% endfor %}
+                </div>
+            </details>
+            <label class="full-label">Ingredients (optional — as printed on the packet)
+                <textarea name="ingredients" rows="2" maxlength="500" placeholder="e.g. Chickpeas, salt, spices"></textarea>
+            </label>
+            <button type="submit">Add to today's total</button>
+        </form>
+        <p class="muted small">Tip: If a label only reports salt (g), it is not the same unit as sodium (mg). Approximately 1 g salt = 400 mg sodium. Check the label before converting.</p>
+    </section>
+
+    <section class="panel">
+        <h2>Foods logged for this day</h2>
+        {% if records %}
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Food</th><th>Eaten</th><th>Calories</th><th>Protein</th><th>Sodium</th><th></th></tr></thead>
+                <tbody>
+                    {% for entry in records %}
+                    <tr>
+                        <td><strong>{{ entry.food_name }}</strong><small>{{ entry.food_type }}</small></td>
+                        <td>{{ entry.quantity_g }} g</td>
+                        <td>{{ entry.calories if entry.calories is not none else '—' }}</td>
+                        <td>{{ entry.protein if entry.protein is not none else '—' }}{% if entry.protein is not none %} g{% endif %}</td>
+                        <td>{{ entry.sodium if entry.sodium is not none else '—' }}{% if entry.sodium is not none %} mg{% endif %}</td>
+                        <td>
+                            <form method="post" action="{{ url_for('nutrition.delete', entry_id=entry.id) }}" onsubmit="return confirm('Remove this food entry?')">
+                                <input type="hidden" name="date" value="{{ selected_date }}">
+                                <button class="delete" type="submit">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+            <p class="muted">No foods logged for this day. Add your first meal above.</p>
+        {% endif %}
+    </section>
+
+    <section class="panel">
+        <h2>Calories recorded over the last 7 days</h2>
+        <p class="muted small">Days without calorie data are left blank, not shown as zero.</p>
+        <div class="chart-area"><canvas id="week-chart" aria-label="Weekly logged calories"></canvas></div>
+        <div id="chart-fallback" class="muted small hidden">Chart is unavailable offline. You can still view your daily totals by selecting a date above.</div>
+    </section>
+    <p class="muted small">NutriCare provides estimated nutrition information, not medical advice. Missing food entries or missing vitamins make daily totals incomplete.</p>
+</main>
+<script type="application/json" id="week-data">{{ week | tojson }}</script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='nutrition_dashboard.js') }}"></script>
+</body>
+</html>
