@@ -1,0 +1,5 @@
+disease,nutrient,min-value,max-value,unit,age-group,gender
+Chronic Kidney Disease,Sodium,,2300.0,mg/day,Adult,All
+Chronic Kidney Disease,Protein,,,g/kg/day,Adult,All
+Chronic Kidney Disease,Potassium,,,mg/day,Adult,All
+Chronic Kidney Disease,Phosphorus,,,mg/day,Adult,All
