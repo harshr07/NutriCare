@@ -127,3 +127,256 @@ nav a {
     color: #666;
     font-size: 13px;
 }
+
+.home-nav {
+    background: #ffffff;
+    border-bottom: 1px solid #dde8e0;
+}
+
+.home-nav h2 {
+    margin: 0;
+}
+
+.nav-links {
+    display: flex;
+    gap: 18px;
+    align-items: center;
+}
+
+.home-hero {
+    max-width: 1100px;
+    margin: 28px auto 18px;
+    padding: 64px 8%;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #e8f5e9, #f3faf6);
+}
+
+.home-hero h1 {
+    max-width: 760px;
+    margin: 10px auto 14px;
+}
+
+.eyebrow {
+    display: inline-block;
+    color: #176b43;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 12px;
+}
+
+.home-features {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.home-cards {
+    align-items: stretch;
+}
+
+.module-card {
+    width: min(320px, 100%);
+    min-height: 390px;
+    display: flex;
+    flex-direction: column;
+    padding: 28px;
+    border: 1px solid #e1ebe4;
+    border-radius: 16px;
+}
+
+.module-card h3 {
+    font-size: 24px;
+    margin: 8px 0;
+}
+
+.module-card p {
+    flex: 0 0 auto;
+}
+
+.module-card ul {
+    padding-left: 18px;
+    color: #59675f;
+    line-height: 1.8;
+}
+
+.module-number {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #d8eee1;
+    color: #176b43;
+    font-weight: 700;
+}
+
+.card-action {
+    margin-top: auto;
+    padding-top: 12px;
+    font-weight: 700;
+}
+
+.integration-note {
+    max-width: 1100px;
+    margin: 18px auto 50px;
+    padding: 24px 30px;
+    background: #fff;
+    border-left: 4px solid #23865b;
+    border-radius: 10px;
+}
+
+.health-page {
+    max-width: 1100px;
+    width: 92%;
+    margin: 28px auto 60px;
+}
+
+.health-heading {
+    text-align: center;
+    padding: 18px 10px 28px;
+}
+
+.health-heading h1 {
+    color: #176b43;
+    font-size: 38px;
+    margin: 10px 0;
+}
+
+.health-heading p {
+    max-width: 680px;
+    margin: 0 auto;
+    color: #66756d;
+}
+
+.health-form-card,
+.health-guidance {
+    background: #fff;
+    border: 1px solid #e1ebe4;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(35, 134, 91, 0.07);
+}
+
+.health-form-card {
+    padding: 24px;
+}
+
+.health-form-card h2,
+.health-guidance h2 {
+    color: #176b43;
+    margin-top: 0;
+}
+
+.health-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.health-form label {
+    display: grid;
+    gap: 8px;
+    color: #44534a;
+    font-weight: 700;
+}
+
+.health-form input,
+.health-form select {
+    width: 100%;
+    height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #bdcbbf;
+    border-radius: 9px;
+    background: #fff;
+    font: inherit;
+}
+
+.health-submit {
+    grid-column: 1 / -1;
+    min-height: 46px;
+}
+
+.health-results {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 18px;
+}
+
+.health-result-card {
+    min-height: 145px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 7px;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #e1ebe4;
+    border-radius: 14px;
+}
+
+.health-result-card span {
+    color: #66756d;
+    font-weight: 700;
+}
+
+.health-result-card strong {
+    color: #176b43;
+    font-size: 28px;
+}
+
+.health-result-card small {
+    color: #78877e;
+}
+
+.bmi-result {
+    background: linear-gradient(135deg, #edf7f1, #fff);
+}
+
+.health-guidance {
+    margin-top: 18px;
+    padding: 22px;
+}
+
+.health-guidance p {
+    line-height: 1.6;
+}
+
+.back-home {
+    display: inline-block;
+    margin-top: 20px;
+    color: #23865b;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+@media (max-width: 760px) {
+    .home-nav,
+    .nav-links {
+        flex-wrap: wrap;
+    }
+
+    .home-nav {
+        gap: 10px;
+    }
+
+    .home-hero {
+        margin: 16px auto;
+        padding: 42px 24px;
+    }
+
+    .home-cards {
+        align-items: center;
+    }
+
+    .module-card {
+        width: 92%;
+    }
+
+    .health-form {
+        grid-template-columns: 1fr;
+    }
+
+    .health-results {
+        grid-template-columns: 1fr;
+    }
+}

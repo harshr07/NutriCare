@@ -4,70 +4,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>NutriCare - Your Health Companion</title>
-
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 
 <body>
-
-    <nav>
+    <nav class="home-nav">
         <h2>NutriCare</h2>
-        <a href="/">Home</a>
-        <a href="/bmi">BMI Calculator</a>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/health/nutrition">Nutrition</a>
+            <a href="/health">Health</a>
+        </div>
     </nav>
 
-    <section class="welcome">
-        <h1>Healthy Living Starts Here</h1>
+    <main>
+        <section class="welcome home-hero">
+            <span class="eyebrow">Your personal wellness dashboard</span>
+            <h1>Health, nutrition and progress — in one place</h1>
+            <p>Track what you eat, understand your body measurements, and view a clear overall summary.</p>
+            <a class="button" href="/health/nutrition">Open Nutrition Log</a>
+        </section>
 
-        <p>
-            Understand your health, eat better,
-            and track your progress with NutriCare.
-        </p>
+        <section class="features home-features" id="features">
+            <h2>Choose what you want to manage</h2>
+            <div class="cards home-cards">
+                <article class="card module-card nutrition-card">
+                    <span class="module-number">01</span>
+                    <h3>Nutrition</h3>
+                    <p>Scan or add packaged food labels, calculate nutrients for the portion eaten, and log your daily intake.
+                    </p>
+                    <ul>
+                        <li>Nutrition label scanner</li>
+                        <li>Daily nutrient totals</li>
+                        <li>Ingredients and disease suitability</li>
+                    </ul>
+                    <a class="card-action" href="/health/nutrition">Open Nutrition →</a>
+                </article>
 
-        <a class="button" href="/bmi">Get Started</a>
-    </section>
+                <article class="card module-card health-card">
+                    <span class="module-number">02</span>
+                    <h3>Health</h3>
+                    <p>Track weight, height, BMI, water, sleep, steps and calories to understand how your health changes over
+                        time.</p>
+                    <ul>
+                        <li>BMI and weight trend</li>
+                        <li>Daily calories and steps</li>
+                        <li>Water and sleep tracking</li>
+                    </ul>
+                    <a class="card-action" href="/health">Open Health →</a>
+                </article>
 
-    <section class="features">
-
-        <h2>What Can You Do With NutriCare?</h2>
-
-        <div class="cards">
-
-            <div class="card">
-                <h3></h3>Check Your BMI</h3>
-                <p>Understand your weight and health goals.</p>
-                <a href="/bmi">Try it now →</a>
+                <article class="card module-card analysis-card">
+                    <span class="module-number">03</span>
+                    <h3>Overall Analysis</h3>
+                    <p>Combine nutrition and health data for a simple summary of progress, patterns and areas to improve.
+                    </p>
+                    <ul>
+                        <li>Weight gain or loss trend</li>
+                        <li>Nutrition against daily intake</li>
+                        <li>Activity and lifestyle insights</li>
+                    </ul>
+                    <a class="card-action" href="/health">View Health Analysis →</a>
+                </article>
             </div>
+        </section>
 
-            <div class="card">
-                <h3>Plan Your Meals</h3>
-                <p>Find food suggestions that fit your budget.</p>
-                <span>Coming soon</span>
-            </div>
-
-            <div class="card">
-                <h3>Explore Medicines</h3>
-                <p>Compare medicine information and prices.</p>
-                <span>Coming soon</span>
-            </div>
-
-            <div class="card">
-                <h3>Scan Medicines</h3>
-                <p>Read information from medicine packaging.</p>
-                <span>Coming soon</span>
-            </div>
-
-            <div class="card">
-                <h3>Track Your Progress</h3>
-                <p>Understand your weekly health habits.</p>
-                <span>Coming soon</span>
-            </div>
-
-        </div>
-
-    </section>
-
+        <section class="integration-note">
+            <h2>Wearable and smartwatch data</h2>
+            <p>Steps and activity can come from a connected watch or health platform later. NutriCare will keep a clear
+                distinction between measured device data and manually entered estimates.</p>
+        </section>
+    </main>
 </body>
+
 </html>

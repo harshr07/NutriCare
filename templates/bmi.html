@@ -2,48 +2,114 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
-    <title>BMI Calculator - NutriCare</title>
-    <link rel="stylesheet"
-          href="{{ url_for('static', filename='style.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Check | NutriCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <nav class="home-nav">
+        <h2>NutriCare</h2>
+        <div class="nav-links">
+            <a href="/">Home</a>
+            <a href="/health/nutrition">Nutrition</a>
+            <a href="/health">Health</a>
+        </div>
+    </nav>
 
-    <main class="bmi-container">
-        <h1>BMI Calculator</h1>
-        <p>Enter your height and weight to check your BMI.</p>
+    <main class="health-page">
+        <section class="health-heading">
+            <span class="eyebrow">Personal health check</span>
+            <h1>Understand your body and daily needs</h1>
+            <p>Enter your details for a simple estimate of weight range, calorie needs, hydration, movement and sleep.</p>
+        </section>
 
-        <form method="POST">
-            <label>Weight (kg)</label>
-            <input type="number" name="weight"
-                   step="any" min="0.1" required>
-
-            <label>Height (cm)</label>
-            <input type="number" name="height"
-                   step="any" min="0.1" required>
-
-            <button type="submit">Calculate BMI</button>
-        </form>
+        <section class="health-form-card">
+            <h2>Your health details</h2>
+            {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+            <form method="POST" class="health-form">
+                <label>Weight (kg)
+                    <input type="number" name="weight" step="0.1" min="1" max="500" value="{{ request.form.weight if request.method == 'POST' else '' }}" placeholder="e.g. 68" required>
+                </label>
+                <label>Height (cm)
+                    <input type="number" name="height" step="0.1" min="50" max="250" value="{{ request.form.height if request.method == 'POST' else '' }}" placeholder="e.g. 170" required>
+                </label>
+                <label>Age (years)
+                    <input type="number" name="age" min="18" max="100" value="{{ request.form.age if request.method == 'POST' else '' }}" placeholder="e.g. 24">
+                </label>
+                <label>Sex used for calorie estimate
+                    <select name="sex">
+                        <option value="">Not specified</option>
+                        <option value="male" {{ 'selected' if request.form.get('sex') == 'male' else '' }}>Male</option>
+                        <option value="female" {{ 'selected' if request.form.get('sex') == 'female' else '' }}>Female</option>
+                    </select>
+                </label>
+                <label>Activity level
+                    <select name="activity">
+                        <option value="">Choose activity</option>
+                        <option value="1.2" {{ 'selected' if request.form.get('activity') == '1.2' else '' }}>Mostly sedentary</option>
+                        <option value="1.375" {{ 'selected' if request.form.get('activity') == '1.375' else '' }}>Lightly active</option>
+                        <option value="1.55" {{ 'selected' if request.form.get('activity') == '1.55' else '' }}>Moderately active</option>
+                        <option value="1.725" {{ 'selected' if request.form.get('activity') == '1.725' else '' }}>Very active</option>
+                    </select>
+                </label>
+                <label>Your main goal
+                    <select name="goal">
+                        <option value="maintain" {{ 'selected' if request.form.get('goal', 'maintain') == 'maintain' else '' }}>Maintain weight</option>
+                        <option value="lose" {{ 'selected' if request.form.get('goal') == 'lose' else '' }}>Lose weight gradually</option>
+                        <option value="gain" {{ 'selected' if request.form.get('goal') == 'gain' else '' }}>Gain weight gradually</option>
+                    </select>
+                </label>
+                <button type="submit" class="health-submit">Calculate my health targets</button>
+            </form>
+        </section>
 
         {% if bmi is not none %}
-            <div class="result">
-                <h2>Your BMI: {{ bmi }}</h2>
-                <p>Category: {{ category }}</p>
-            </div>
+        <section class="health-results">
+            <article class="health-result-card bmi-result">
+                <span>Body balance</span>
+                <strong>{{ bmi }}</strong>
+                <small>{{ category }}</small>
+            </article>
+
+            {% if health %}
+            <article class="health-result-card">
+                <span>Daily calories</span>
+                <strong>{{ health.calorie_goal if health.calorie_goal is not none else '—' }}</strong>
+                <small>kcal target{% if health.tdee %} · ~{{ health.tdee }} kcal maintenance{% endif %}</small>
+            </article>
+            <article class="health-result-card">
+                <span>Water</span>
+                <strong>{{ health.water_liters }}</strong>
+                <small>litres per day estimate</small>
+            </article>
+            <article class="health-result-card">
+                <span>Daily steps</span>
+                <strong>{{ health.steps_goal }}</strong>
+                <small>steps based on activity</small>
+            </article>
+            <article class="health-result-card">
+                <span>Sleep</span>
+                <strong>{{ health.sleep_goal }}</strong>
+                <small>recommended adult range</small>
+            </article>
+            <article class="health-result-card">
+                <span>Healthy weight range</span>
+                <strong>{{ health.healthy_weight_min }}–{{ health.healthy_weight_max }}</strong>
+                <small>kg at this height</small>
+            </article>
+            {% endif %}
+        </section>
+
+        {% if health %}
+        <section class="health-guidance">
+            <h2>Personal guidance</h2>
+            <p>{{ health.guidance }}</p>
+            <p class="note">These values are estimates, not medical diagnoses. For pregnancy, health conditions or medication, consult a qualified healthcare professional.</p>
+        </section>
+        {% endif %}
         {% endif %}
 
-        {% if error %}
-            <p class="error">{{ error }}</p>
-        {% endif %}
-
-        <p class="note">
-            BMI is a screening tool for adults,
-            not a medical diagnosis.
-        </p>
-
-        <a href="/">Back to Home</a>
+        <a class="back-home" href="/">← Back to Home</a>
     </main>
-
 </body>
 </html>
