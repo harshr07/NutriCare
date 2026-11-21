@@ -1,8 +1,12 @@
 from flask import Flask, jsonify, render_template, request
 from health import health_bp
 from nutrition_dashboard import nutrition_bp
+from database import initialize_database, get_disease_nutrients
+
 
 app = Flask(__name__, static_folder="statics")
+
+initialize_database()
 
 app.register_blueprint(health_bp)
 app.register_blueprint(nutrition_bp)
