@@ -1,0 +1,6 @@
+disease,nutrient,min-value,max-value,unit,age-group,gender
+Kidney Disease (CKD),Protein,0.8,0.8,g/kg body weight/day,Adults,All
+Kidney Disease (CKD),Potassium,,,mg/day,Adults,All
+Kidney Disease (CKD),Phosphorus,,,mg/day,Adults,All
+Kidney Disease (CKD),Calcium,,,mg/day,Adults,All
+Kidney Disease (CKD),Water,,,ml/day,Adults,All

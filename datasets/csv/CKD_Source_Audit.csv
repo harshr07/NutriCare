@@ -1,0 +1,4 @@
+source,url,status,records_found
+KDIGO,https://kdigo.org/wp-content/uploads/2024/03/KDIGO-2024-CKD-Guideline.pdf,Success,5
+KDOQI,https://pubmed.ncbi.nlm.nih.gov/32829751/,403 Client Error: Forbidden for url: https://pubmed.ncbi.nlm.nih.gov/32829751/,0
+NIDDK,https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease,Success,3
