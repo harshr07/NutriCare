@@ -1,0 +1,7 @@
+<div class="account-strip">
+    <span>Signed in as <strong>{{ logged_in_user or 'NutriCare member' }}</strong></span>
+    <form method="post" action="{{ url_for('auth.logout') }}">
+        <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
+        <button type="submit">Log out</button>
+    </form>
+</div>

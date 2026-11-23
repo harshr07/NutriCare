@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Daily Nutrition | NutriCare</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='nutrition_dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
 </head>
 <body>
 <header>
     <a class="brand" href="/"> NutriCare</a>
     <nav><a href="/health">My Health</a><a href="{{ url_for('nutrition.dashboard') }}">Nutrition Log</a></nav>
+    {% include '_account_strip.html' %}
 </header>
+{% include '_flash_messages.html' %}
 <main>
     <div class="page-title">
         <div>

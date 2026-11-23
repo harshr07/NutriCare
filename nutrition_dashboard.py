@@ -1,19 +1,12 @@
 from datetime import date, timedelta
 import math
-from flask import Blueprint, abort, redirect, render_template, request, url_for
+from flask import Blueprint, redirect, render_template, request, session, url_for
 from nutrition_storage import NUTRIENTS, entries_from, entries_on, remove_entry, save_entry
 
 nutrition_bp = Blueprint("nutrition", __name__)
 
 COMMON = ["calories", "protein", "carbs", "fat", "fiber", "sugar", "added_sugar", "saturated_fat", "sodium"]
 EXTRA = [name for name in NUTRIENTS if name not in COMMON]
-
-
-@nutrition_bp.before_request
-def local_only():
-    # A temporary safeguard until teammate's authentication is connected.
-    if request.remote_addr not in ("127.0.0.1", "::1"):
-        abort(403, "Nutrition demo is local-only until login is integrated.")
 
 
 def selected_day():
@@ -102,10 +95,10 @@ def known_totals(entries):
 
 
 def dashboard_page(day, error=None):
-    records = entries_on(day)
+    records = entries_on(day, session["user_id"])
     today = date.today()
     start = today - timedelta(days=6)
-    week_records = entries_from(start.isoformat(), today.isoformat())
+    week_records = entries_from(start.isoformat(), today.isoformat(), session["user_id"])
     week = []
     for i in range(7):
         d = start + timedelta(days=i)
@@ -129,11 +122,11 @@ def add():
         entry = build_entry(request.form)
     except ValueError as exc:
         return dashboard_page(selected_day(), str(exc)), 400
-    save_entry(entry)
+    save_entry(entry, session["user_id"])
     return redirect(url_for("nutrition.dashboard", date=entry["entry_date"]))
 
 
 @nutrition_bp.route("/health/nutrition/delete/<int:entry_id>", methods=["POST"])
 def delete(entry_id):
-    remove_entry(entry_id)
+    remove_entry(entry_id, session["user_id"])
     return redirect(url_for("nutrition.dashboard", date=selected_day()))

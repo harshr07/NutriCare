@@ -6,6 +6,7 @@
     <meta name="theme-color" content="#f6f7f2">
     <title>NutriCare — everyday health, made clearer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
 </head>
 <body class="landing-page">
     <header class="landing-header">
@@ -17,10 +18,12 @@
             <a href="#how-it-helps">How it helps</a>
             <a href="/health">My health</a>
             <a href="/health/nutrition">Nutrition log</a>
+            {% include '_account_strip.html' %}
         </nav>
         <a class="header-cta" href="/bmi">Get started <span aria-hidden="true">↗</span></a>
     </header>
 
+    {% include '_flash_messages.html' %}
     <main>
         <section class="landing-hero">
             <div class="hero-copy">

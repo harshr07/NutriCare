@@ -1,7 +1,10 @@
 """Unit tests for the BMI calculator in NutriCare."""
 
 import unittest
+import uuid
 
+import _support  # noqa: F401  (must be imported before app: isolates the databases)
+from _support import register
 from app import app
 
 
@@ -11,13 +14,19 @@ class BMICalculatorTests(unittest.TestCase):
     def setUp(self):
         app.config["TESTING"] = True
         self.client = app.test_client()
+        # The health check is behind login, like every other app page.
+        register(self.client, "bmi-{}@example.com".format(uuid.uuid4().hex))
+
+    def test_requires_login(self):
+        response = app.test_client().post("/bmi", data={"weight": "68", "height": "170"})
+        self.assertEqual(response.status_code, 302)
 
     def test_healthy_weight_calculation(self):
         response = self.client.post(
             "/bmi", data={"weight": "68", "height": "170"}
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn(b"Your BMI: 23.53", response.data)
+        self.assertIn(b"<strong>23.53</strong>", response.data)
         self.assertIn(b"Healthy Weight", response.data)
 
     def test_underweight_category(self):
@@ -36,14 +45,14 @@ class BMICalculatorTests(unittest.TestCase):
         response = self.client.post(
             "/bmi", data={"weight": "0", "height": "170"}
         )
-        self.assertIn(b"Please enter valid height and weight.", response.data)
-        self.assertNotIn(b"Your BMI:", response.data)
+        self.assertIn(b"Please enter valid measurements.", response.data)
+        self.assertNotIn(b"Body balance", response.data)
 
     def test_non_numeric_input_is_rejected(self):
         response = self.client.post(
             "/bmi", data={"weight": "abc", "height": "170"}
         )
-        self.assertIn(b"Please enter numbers only.", response.data)
+        self.assertIn(b"Please enter valid numbers.", response.data)
 
 
 if __name__ == "__main__":

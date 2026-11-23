@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Health Check | NutriCare</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
 </head>
 <body>
     <nav class="home-nav">
@@ -14,7 +15,9 @@
             <a href="/health/nutrition">Nutrition</a>
             <a href="/health">Health</a>
         </div>
+        {% include '_account_strip.html' %}
     </nav>
+    {% include '_flash_messages.html' %}
 
     <main class="health-page">
         <section class="health-heading">

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f7f2">
+    <title>Create account | NutriCare</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='auth.css') }}">
+</head>
+<body class="auth-page">
+    <main class="auth-shell">
+        <a class="auth-brand" href="{{ url_for('auth.login') }}"><span class="brand-mark">n</span><span>nutricare</span></a>
+        <section class="auth-card register-card" aria-labelledby="auth-title">
+            <div class="auth-symbol" aria-hidden="true">✳</div>
+            <p class="eyebrow">A HEALTHIER ROUTINE STARTS HERE</p>
+            <h1 id="auth-title">Create your account.</h1>
+            <p class="auth-subtitle">A personal space for your everyday food and health notes.</p>
+
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-stack" role="status">
+                        {% for category, message in messages %}
+                            <p class="flash {{ category }}">{{ message }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form method="post" action="{{ url_for('auth.register', next=next_url) if next_url else url_for('auth.register') }}" class="auth-form">
+                <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
+                {% if next_url %}<input type="hidden" name="next" value="{{ next_url }}">{% endif %}
+                <label for="full_name">Full name</label>
+                <input id="full_name" name="full_name" type="text" autocomplete="name" maxlength="80" placeholder="Your name" required autofocus>
+
+                <label for="email">Email address</label>
+                <input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required>
+
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="At least 8 characters" required>
+
+                <label for="confirm_password">Confirm password</label>
+                <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" minlength="8" maxlength="128" placeholder="Enter your password again" required>
+
+                <button class="auth-submit" type="submit">Create account <span aria-hidden="true">→</span></button>
+            </form>
+            <p class="auth-switch">Already have an account? <a href="{{ url_for('auth.login', next=next_url) if next_url else url_for('auth.login') }}">Log in</a></p>
+        </section>
+        <p class="auth-footnote">Your password is securely hashed before it is stored.</p>
+    </main>
+</body>
+</html>

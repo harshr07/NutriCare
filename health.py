@@ -1,14 +1,41 @@
-"""NutriCare Health Tracker - local prototype only (authentication not connected)."""
+"""NutriCare Health Tracker - daily health logs, private to each logged-in user."""
 import csv
 import io
 import os
 import sqlite3
 from datetime import date, timedelta
 
-from flask import Blueprint, Response, abort, current_app, redirect, render_template, request, url_for
+from flask import Blueprint, Response, abort, current_app, redirect, render_template, request, session, url_for
 from analytics import analyze_health
 
 health_bp = Blueprint("health", __name__)
+
+
+HEALTH_LOGS_SCHEMA = """CREATE TABLE IF NOT EXISTS health_logs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        log_date TEXT NOT NULL,
+        weight REAL, water REAL, sleep REAL, steps INTEGER,
+        calories INTEGER,
+        UNIQUE (user_id, log_date)
+    )"""
+
+
+def _migrate_legacy_health_logs(connection):
+    """Add per-user ownership to a health_logs table made before login existed.
+
+    The old table had a global UNIQUE(log_date), which would stop two users from
+    logging the same day, so it is rebuilt. Old rows are kept with user_id NULL,
+    which means no registered user can see them (same as nutrition_entries).
+    """
+    columns = {row["name"] for row in connection.execute("PRAGMA table_info(health_logs)")}
+    if not columns or "user_id" in columns:
+        return
+    connection.execute("ALTER TABLE health_logs RENAME TO health_logs_legacy")
+    connection.execute(HEALTH_LOGS_SCHEMA)
+    connection.execute("""INSERT INTO health_logs (id, user_id, log_date, weight, water, sleep, steps, calories)
+        SELECT id, NULL, log_date, weight, water, sleep, steps, calories FROM health_logs_legacy""")
+    connection.execute("DROP TABLE health_logs_legacy")
 
 
 def get_db():
@@ -16,14 +43,16 @@ def get_db():
     database_path = os.path.join(current_app.instance_path, "health.db")
     connection = sqlite3.connect(database_path)
     connection.row_factory = sqlite3.Row
-    connection.execute("""CREATE TABLE IF NOT EXISTS health_logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        log_date TEXT UNIQUE NOT NULL,
-        weight REAL, water REAL, sleep REAL, steps INTEGER,
-        calories INTEGER
-    )""")
+    _migrate_legacy_health_logs(connection)
+    connection.execute(HEALTH_LOGS_SCHEMA)
+    connection.execute("CREATE INDEX IF NOT EXISTS idx_health_logs_user_date ON health_logs(user_id, log_date)")
     connection.commit()
     return connection
+
+
+def current_user_id():
+    # app.require_login guarantees a valid user before any health route runs.
+    return session["user_id"]
 
 
 def number(form, name, minimum, maximum, integer=False):
@@ -65,7 +94,8 @@ def dashboard():
     days = 30 if request.args.get("days") == "30" else 7
     start = (date.today() - timedelta(days=days - 1)).isoformat()
     db = get_db()
-    rows = db.execute("SELECT * FROM health_logs WHERE log_date >= ? ORDER BY log_date", (start,)).fetchall()
+    rows = db.execute("SELECT * FROM health_logs WHERE user_id = ? AND log_date >= ? ORDER BY log_date",
+                      (current_user_id(), start)).fetchall()
     db.close()
     records = [{"id": r["id"], "date": r["log_date"], "weight": r["weight"],
                 "water": r["water"], "sleep": r["sleep"], "steps": r["steps"],
@@ -84,9 +114,9 @@ def save_health_log():
     db = get_db()
     try:
         db.execute("""INSERT INTO health_logs
-            (log_date, weight, water, sleep, steps, calories)
-            VALUES (?, ?, ?, ?, ?, ?)""",
-            (values["date"], values["weight"], values["water"], values["sleep"], values["steps"], values["calories"]))
+            (user_id, log_date, weight, water, sleep, steps, calories)
+            VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (current_user_id(), values["date"], values["weight"], values["water"], values["sleep"], values["steps"], values["calories"]))
         db.commit()
     except sqlite3.IntegrityError:
         return "A log already exists for this date. Edit it below instead.", 400
@@ -104,7 +134,7 @@ def update_health_log(log_id):
     db = get_db()
     try:
         result = db.execute("""UPDATE health_logs SET log_date=?, weight=?, water=?, sleep=?, steps=?, calories=?
-            WHERE id=?""", (values["date"], values["weight"], values["water"], values["sleep"], values["steps"], values["calories"], log_id))
+            WHERE id=? AND user_id=?""", (values["date"], values["weight"], values["water"], values["sleep"], values["steps"], values["calories"], log_id, current_user_id()))
         db.commit()
         if result.rowcount == 0:
             abort(404)
@@ -118,7 +148,7 @@ def update_health_log(log_id):
 @health_bp.route("/health/delete/<int:log_id>", methods=["POST"])
 def delete_health_log(log_id):
     db = get_db()
-    db.execute("DELETE FROM health_logs WHERE id=?", (log_id,))
+    db.execute("DELETE FROM health_logs WHERE id=? AND user_id=?", (log_id, current_user_id()))
     db.commit()
     db.close()
     return redirect(url_for("health.dashboard"))
@@ -127,7 +157,8 @@ def delete_health_log(log_id):
 @health_bp.route("/health/export")
 def export_health_data():
     db = get_db()
-    rows = db.execute("SELECT log_date, weight, water, sleep, steps, calories FROM health_logs ORDER BY log_date").fetchall()
+    rows = db.execute("SELECT log_date, weight, water, sleep, steps, calories FROM health_logs WHERE user_id = ? ORDER BY log_date",
+                      (current_user_id(),)).fetchall()
     db.close()
     out = io.StringIO()
     writer = csv.writer(out)

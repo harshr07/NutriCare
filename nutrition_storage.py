@@ -32,6 +32,7 @@ def get_connection():
     db.execute(f"""
         CREATE TABLE IF NOT EXISTS nutrition_entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER,
             entry_date TEXT NOT NULL,
             food_name TEXT NOT NULL,
             food_type TEXT NOT NULL,
@@ -44,53 +45,58 @@ def get_connection():
             {columns}
         )
     """)
+    columns_present = {row["name"] for row in db.execute("PRAGMA table_info(nutrition_entries)")}
+    if "user_id" not in columns_present:
+        # Preserve legacy rows, but keep them outside every newly registered user's view.
+        db.execute("ALTER TABLE nutrition_entries ADD COLUMN user_id INTEGER")
+    db.execute("CREATE INDEX IF NOT EXISTS idx_nutrition_entries_user_date ON nutrition_entries(user_id, entry_date)")
     db.commit()
     return db
 
 
-def save_entry(entry):
-    fields = ["entry_date", "food_name", "food_type", "ingredients", "source",
+def save_entry(entry, user_id):
+    fields = ["user_id", "entry_date", "food_name", "food_type", "ingredients", "source",
               "quantity_g", "label_basis", "serving_g", "cost_rupees"] + list(NUTRIENTS)
     placeholders = ", ".join("?" for _ in fields)
     with_db = get_connection()
     try:
         with_db.execute(
             f"INSERT INTO nutrition_entries ({', '.join(fields)}) VALUES ({placeholders})",
-            [entry.get(name) for name in fields],
+            [user_id] + [entry.get(name) for name in fields if name != "user_id"],
         )
         with_db.commit()
     finally:
         with_db.close()
 
 
-def entries_on(day):
+def entries_on(day, user_id):
     db = get_connection()
     try:
         rows = db.execute(
-            "SELECT * FROM nutrition_entries WHERE entry_date = ? ORDER BY id DESC",
-            (day,),
+            "SELECT * FROM nutrition_entries WHERE user_id = ? AND entry_date = ? ORDER BY id DESC",
+            (user_id, day),
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
         db.close()
 
 
-def entries_from(start, end):
+def entries_from(start, end, user_id):
     db = get_connection()
     try:
         rows = db.execute(
-            "SELECT * FROM nutrition_entries WHERE entry_date BETWEEN ? AND ? ORDER BY entry_date",
-            (start, end),
+            "SELECT * FROM nutrition_entries WHERE user_id = ? AND entry_date BETWEEN ? AND ? ORDER BY entry_date",
+            (user_id, start, end),
         ).fetchall()
         return [dict(row) for row in rows]
     finally:
         db.close()
 
 
-def remove_entry(entry_id):
+def remove_entry(entry_id, user_id):
     db = get_connection()
     try:
-        db.execute("DELETE FROM nutrition_entries WHERE id = ?", (entry_id,))
+        db.execute("DELETE FROM nutrition_entries WHERE id = ? AND user_id = ?", (entry_id, user_id))
         db.commit()
     finally:
         db.close()

@@ -5,10 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>My Health | NutriCare</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='health.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='account.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <header><a href="/">🌿 NutriCare</a><span>My Health</span><nav><a href="/bmi">Health Check</a><a href="/health/nutrition">Nutrition Log</a></nav></header>
+  <header><a href="/">🌿 NutriCare</a><span>My Health</span><nav><a href="/bmi">Health Check</a><a href="/health/nutrition">Nutrition Log</a></nav>{% include '_account_strip.html' %}</header>
+  {% include '_flash_messages.html' %}
   <main>
     <h1>Your health, one day at a time</h1>
     <p class="muted">Add your daily numbers and see how they change over time.</p>
@@ -62,7 +64,7 @@
     {% else %}
       <section class="panel"><h2>No records yet</h2><p>Add your first daily record above to see your progress here.</p></section>
     {% endif %}
-    <p class="muted small">This is a personal logging demo, not medical advice. Do not enter real sensitive health records before authentication and access protection are connected.</p>
+    <p class="muted small">This is a personal logging demo, not medical advice. Your records are linked to your account and are only visible after you log in.</p>
   </main>
   {% if records %}<script>
     const healthRecords = {{ records | tojson }};

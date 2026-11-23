@@ -1,0 +1,60 @@
+.account-strip {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin: 0 0 0 auto;
+    color: #52665a;
+    font-size: 12px;
+}
+.account-strip { flex-shrink: 0; }
+.account-strip form { display: inline-flex; margin: 0; }
+.account-strip button {
+    padding: 7px 12px;
+    border: 1px solid #d3dfd2;
+    border-radius: 999px;
+    background: #fff;
+    color: #286746;
+    cursor: pointer;
+    font: inherit;
+    font-weight: 700;
+}
+.account-strip button:hover { background: #edf5eb; }
+@media (max-width: 620px) {
+    .account-strip { width: 100%; justify-content: center; margin-top: 10px; }
+}
+
+.landing-nav .account-strip { width: auto; gap: 8px; margin: 0 0 0 4px; white-space: nowrap; }
+@media (max-width: 640px) {
+    .landing-nav .account-strip { width: 100%; justify-content: center; margin: 6px 0 0; }
+}
+header { flex-wrap: wrap; }
+.landing-nav { flex-wrap: wrap; }
+
+/* Flash messages shown on app pages (e.g. "Welcome back" after logging in). */
+.app-flash-stack {
+    display: grid;
+    gap: 8px;
+    width: min(100% - 32px, 1100px);
+    margin: 16px auto 0;
+}
+.app-flash-stack .flash {
+    margin: 0;
+    padding: 11px 14px;
+    border: 1px solid #cfe3d2;
+    border-radius: 12px;
+    background: #eef7ef;
+    color: #1d5c3e;
+    font-size: 14px;
+}
+.app-flash-stack .flash.error {
+    border-color: #f0cccc;
+    background: #fdf0f0;
+    color: #8a2b2b;
+}
+.account-strip strong { color: #20352b; }
+
+/* The account strip is a third item in each page header, so space the items out
+   instead of letting the logo, page links and account strip touch. */
+header, .home-nav { gap: 10px 28px; }
+header nav { display: flex; gap: 18px; }
