@@ -1,0 +1,7 @@
+disease,nutrient,min-value,max-value,unit,age-group,gender
+fever, Energy, 600, 1200, kcal/day, Adult, All
+fever, Protein, 100, None, g/day, Adult, All
+fever, Fluid, 2.5, 5, L/day, Adult, "All
+fever, Vitamin A, None, None, Increased attention, Adult, All
+fever, Vitamin C, None, None, Increased attention, Adult, All
+fever, Vitamin B, None, None, Increased attention, Adult, All

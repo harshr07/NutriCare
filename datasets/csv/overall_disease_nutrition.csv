@@ -1,0 +1,146 @@
+disease,nutrient,min-value,max-value,unit,age-group,gender,verified
+Healthy,Protein,43.0,,g/day,Adult,Male,Yes
+Healthy,Protein,36.0,,g/day,Adult,Female,Yes
+Healthy,Calcium,800.0,2500.0,mg/day,Adult,Male,Yes
+Healthy,Calcium,800.0,2500.0,mg/day,Adult,Female,Yes
+Healthy,Iron,11.0,45.0,mg/day,Adult,Male,Yes
+Healthy,Iron,15.0,45.0,mg/day,Adult,Female,Yes
+Healthy,Zinc,14.1,40.0,mg/day,Adult,Male,Yes
+Healthy,Zinc,11.0,40.0,mg/day,Adult,Female,Yes
+Healthy,Iodine,95.0,1100.0,µg/day,Adult,Male,Yes
+Healthy,Iodine,95.0,1100.0,µg/day,Adult,Female,Yes
+Healthy,Vitamin B6,1.6,100.0,mg/day,Adult,Male,Yes
+Healthy,Vitamin B6,1.6,100.0,mg/day,Adult,Female,Yes
+Healthy,Folate,250.0,1000.0,µg/day,Adult,Male,Yes
+Healthy,Folate,180.0,1000.0,µg/day,Adult,Female,Yes
+Healthy,Vitamin C,65.0,2000.0,mg/day,Adult,Male,Yes
+Healthy,Vitamin C,55.0,2000.0,mg/day,Adult,Female,Yes
+Healthy,Vitamin A,460.0,3000.0,µg/day,Adult,Male,Yes
+Healthy,Vitamin A,390.0,3000.0,µg/day,Adult,Female,Yes
+Healthy,Vitamin D,400.0,4000.0,IU/day,Adult,Male,Yes
+Healthy,Vitamin D,400.0,4000.0,IU/day,Adult,Female,Yes
+Healthy,Vitamin B12,2.0,,µg/day,Adult,Male,Yes
+Healthy,Vitamin B12,2.0,,µg/day,Adult,Female,Yes
+Healthy,Vitamin B1 (Thiamine),1.2,,mg/day,Adult,Male,Yes
+Healthy,Vitamin B1 (Thiamine),1.1,,mg/day,Adult,Female,Yes
+Healthy,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Male,Yes
+Healthy,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Female,Yes
+Healthy,Magnesium,370.0,,mg/day,Adult,Male,Yes
+Healthy,Magnesium,310.0,,mg/day,Adult,Female,Yes
+Healthy,Sodium,,2000.0,mg/day,Adult,Male,Yes
+Healthy,Sodium,,2000.0,mg/day,Adult,Female,Yes
+Healthy,Potassium,,,mg/day,Adult,Male,Yes
+Healthy,Potassium,,,mg/day,Adult,Female,Yes
+Chronic Kidney Disease,Calcium,,,mg/day,Adult,Male,No
+Chronic Kidney Disease,Calcium,,,mg/day,Adult,Female,No
+Chronic Kidney Disease,Iron,11.0,45.0,mg/day,Adult,Male,No
+Chronic Kidney Disease,Iron,15.0,45.0,mg/day,Adult,Female,No
+Chronic Kidney Disease,Zinc,14.1,40.0,mg/day,Adult,Male,No
+Chronic Kidney Disease,Zinc,11.0,40.0,mg/day,Adult,Female,No
+Chronic Kidney Disease,Iodine,95.0,1100.0,µg/day,Adult,Male,No
+Chronic Kidney Disease,Iodine,95.0,1100.0,µg/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin B6,1.6,100.0,mg/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin B6,1.6,100.0,mg/day,Adult,Female,No
+Chronic Kidney Disease,Folate,250.0,1000.0,µg/day,Adult,Male,No
+Chronic Kidney Disease,Folate,180.0,1000.0,µg/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin C,65.0,2000.0,mg/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin C,55.0,2000.0,mg/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin A,460.0,3000.0,µg/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin A,390.0,3000.0,µg/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin D,400.0,4000.0,IU/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin D,400.0,4000.0,IU/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin B12,2.0,,µg/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin B12,2.0,,µg/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin B1 (Thiamine),1.2,,mg/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin B1 (Thiamine),1.1,,mg/day,Adult,Female,No
+Chronic Kidney Disease,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Male,No
+Chronic Kidney Disease,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Female,No
+Chronic Kidney Disease,Magnesium,370.0,,mg/day,Adult,Male,No
+Chronic Kidney Disease,Magnesium,310.0,,mg/day,Adult,Female,No
+Chronic Kidney Disease,Potassium,,,mg/day,Adult,Male,No
+Chronic Kidney Disease,Potassium,,,mg/day,Adult,Female,No
+diabetes,Protein,50.0,100.0,g,Adult,Male,Yes
+diabetes,Protein,36.0,,g/day,Adult,Female,No
+diabetes,Calcium,800.0,2500.0,mg/day,Adult,Male,No
+diabetes,Calcium,800.0,2500.0,mg/day,Adult,Female,No
+diabetes,Iron,11.0,45.0,mg/day,Adult,Male,No
+diabetes,Iron,15.0,45.0,mg/day,Adult,Female,No
+diabetes,Zinc,14.1,40.0,mg/day,Adult,Male,No
+diabetes,Zinc,11.0,40.0,mg/day,Adult,Female,No
+diabetes,Iodine,95.0,1100.0,µg/day,Adult,Male,No
+diabetes,Iodine,95.0,1100.0,µg/day,Adult,Female,No
+diabetes,Vitamin B6,1.6,100.0,mg/day,Adult,Male,No
+diabetes,Vitamin B6,1.6,100.0,mg/day,Adult,Female,No
+diabetes,Folate,250.0,1000.0,µg/day,Adult,Male,No
+diabetes,Folate,180.0,1000.0,µg/day,Adult,Female,No
+diabetes,Vitamin C,65.0,2000.0,mg/day,Adult,Male,No
+diabetes,Vitamin C,55.0,2000.0,mg/day,Adult,Female,No
+diabetes,Vitamin A,460.0,3000.0,µg/day,Adult,Male,No
+diabetes,Vitamin A,390.0,3000.0,µg/day,Adult,Female,No
+diabetes,Vitamin D,400.0,4000.0,IU/day,Adult,Male,No
+diabetes,Vitamin D,400.0,4000.0,IU/day,Adult,Female,No
+diabetes,Vitamin B12,2.0,,µg/day,Adult,Male,No
+diabetes,Vitamin B12,2.0,,µg/day,Adult,Female,No
+diabetes,Vitamin B1 (Thiamine),1.2,,mg/day,Adult,Male,No
+diabetes,Vitamin B1 (Thiamine),1.1,,mg/day,Adult,Female,No
+diabetes,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Male,No
+diabetes,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Female,No
+diabetes,Potassium,,,mg/day,Adult,Male,No
+diabetes,Potassium,,,mg/day,Adult,Female,No
+fever,Calcium,800.0,2500.0,mg/day,Adult,Male,No
+fever,Calcium,800.0,2500.0,mg/day,Adult,Female,No
+fever,Iron,11.0,45.0,mg/day,Adult,Male,No
+fever,Iron,15.0,45.0,mg/day,Adult,Female,No
+fever,Zinc,14.1,40.0,mg/day,Adult,Male,No
+fever,Zinc,11.0,40.0,mg/day,Adult,Female,No
+fever,Iodine,95.0,1100.0,µg/day,Adult,Male,No
+fever,Iodine,95.0,1100.0,µg/day,Adult,Female,No
+fever,Vitamin B6,1.6,100.0,mg/day,Adult,Male,No
+fever,Vitamin B6,1.6,100.0,mg/day,Adult,Female,No
+fever,Folate,250.0,1000.0,µg/day,Adult,Male,No
+fever,Folate,180.0,1000.0,µg/day,Adult,Female,No
+fever,Vitamin C,65.0,2000.0,mg/day,Adult,Male,No
+fever,Vitamin C,55.0,2000.0,mg/day,Adult,Female,No
+fever,Vitamin A,460.0,3000.0,µg/day,Adult,Male,No
+fever,Vitamin A,390.0,3000.0,µg/day,Adult,Female,No
+fever,Vitamin D,400.0,4000.0,IU/day,Adult,Male,No
+fever,Vitamin D,400.0,4000.0,IU/day,Adult,Female,No
+fever,Vitamin B12,2.0,,µg/day,Adult,Male,No
+fever,Vitamin B12,2.0,,µg/day,Adult,Female,No
+fever,Vitamin B1 (Thiamine),1.2,,mg/day,Adult,Male,No
+fever,Vitamin B1 (Thiamine),1.1,,mg/day,Adult,Female,No
+fever,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Male,No
+fever,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Female,No
+fever,Magnesium,370.0,,mg/day,Adult,Male,No
+fever,Magnesium,310.0,,mg/day,Adult,Female,No
+fever,Sodium,,2000.0,mg/day,Adult,Male,No
+fever,Sodium,,2000.0,mg/day,Adult,Female,No
+fever,Potassium,,,mg/day,Adult,Male,No
+fever,Potassium,,,mg/day,Adult,Female,No
+diabetes,calories,1200.0,2000.0,kcal,Adult,Male,Yes
+diabetes,calories,1200.0,2000.0,kcal,Adult,Female,Yes
+diabetes,carbohydrates,130.0,250.0,g,Adult,Female,Yes
+diabetes,total sugar,0.0,0.0,g,Adult,Male,Yes
+diabetes,total sugar,0.0,0.0,g,Adult,Female,Yes
+Chronic Kidney Disease,Protein,0.8,0.8,g/kg body weight/day,Adult,Male,Yes
+Chronic Kidney Disease,Sodium,,2300.0,mg/day,Adult,Male,Yes
+diabetes,Magnesium,,350.0,mg/day,Adult,Male,Yes
+diabetes,Sodium,0.0,2300.0,mg/day,Adult,Male,Yes
+fever,Protein,100.0,,g/day,Adult,Male,Yes
+fever,Energy, 600, 1200, kcal/day, Adult,Male,Yes
+fever,Fluid, 2.5, 5, L/day, Adult,Male,Yes
+fever,Vitamin A, None, None, Increased attention, Adult,Male,Yes
+fever,Vitamin C, None, None, Increased attention, Adult,Male,Yes
+fever,Vitamin B, None, None, Increased attention, Adult,Male,Yes
+diabetes,cinnamon,,6.0,g/day,Adult,Male,Yes
+Chronic Kidney Disease,Protein,0.8,0.8,g/kg body weight/day,Adult,Female,Yes
+Chronic Kidney Disease,Sodium,,2300.0,mg/day,Adult,Female,Yes
+diabetes,Magnesium,,350.0,mg/day,Adult,Female,Yes
+diabetes,Sodium,0.0,2300.0,mg/day,Adult,Female,Yes
+fever,Protein,100.0,,g/day,Adult,Female,Yes
+fever,Energy, 600, 1200, kcal/day, Adult,Female,Yes
+fever,Fluid, 2.5, 5, L/day, Adult,Female,Yes
+fever,Vitamin A, None, None, Increased attention, Adult,Female,Yes
+fever,Vitamin C, None, None, Increased attention, Adult,Female,Yes
+fever,Vitamin B, None, None, Increased attention, Adult,Female,Yes
+diabetes,cinnamon,,6.0,g/day,Adult,Female,Yes

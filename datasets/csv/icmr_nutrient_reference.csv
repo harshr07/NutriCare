@@ -1,0 +1,33 @@
+﻿disease,nutrient,min-value,max-value,unit,age-group,gender
+Healthy,Protein,43,,g/day,Adult,Male
+Healthy,Protein,36,,g/day,Adult,Female
+Healthy,Calcium,800,2500,mg/day,Adult,Male
+Healthy,Calcium,800,2500,mg/day,Adult,Female
+Healthy,Iron,11,45,mg/day,Adult,Male
+Healthy,Iron,15,45,mg/day,Adult,Female
+Healthy,Zinc,14.1,40,mg/day,Adult,Male
+Healthy,Zinc,11,40,mg/day,Adult,Female
+Healthy,Iodine,95,1100,µg/day,Adult,Male
+Healthy,Iodine,95,1100,µg/day,Adult,Female
+Healthy,Vitamin B6,1.6,100,mg/day,Adult,Male
+Healthy,Vitamin B6,1.6,100,mg/day,Adult,Female
+Healthy,Folate,250,1000,µg/day,Adult,Male
+Healthy,Folate,180,1000,µg/day,Adult,Female
+Healthy,Vitamin C,65,2000,mg/day,Adult,Male
+Healthy,Vitamin C,55,2000,mg/day,Adult,Female
+Healthy,Vitamin A,460,3000,µg/day,Adult,Male
+Healthy,Vitamin A,390,3000,µg/day,Adult,Female
+Healthy,Vitamin D,400,4000,IU/day,Adult,Male
+Healthy,Vitamin D,400,4000,IU/day,Adult,Female
+Healthy,Vitamin B12,2,,µg/day,Adult,Male
+Healthy,Vitamin B12,2,,µg/day,Adult,Female
+Healthy,Vitamin B1 (Thiamine),1.2,,mg/day,Adult,Male
+Healthy,Vitamin B1 (Thiamine),1.1,,mg/day,Adult,Female
+Healthy,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Male
+Healthy,Vitamin B2 (Riboflavin),1.6,,mg/day,Adult,Female
+Healthy,Magnesium,370,,mg/day,Adult,Male
+Healthy,Magnesium,310,,mg/day,Adult,Female
+Healthy,Sodium,,2000,mg/day,Adult,Male
+Healthy,Sodium,,2000,mg/day,Adult,Female
+Healthy,Potassium,,,mg/day,Adult,Male
+Healthy,Potassium,,,mg/day,Adult,Female
