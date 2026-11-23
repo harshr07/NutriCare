@@ -105,3 +105,5 @@ def delete_disease_nutrient(disease, nutrient):
         return cursor.rowcount > 0
     finally:
         conn.close()
+
+
