@@ -1,3 +1,5 @@
+import math
+
 from flask import Flask, jsonify, render_template, request
 from health import health_bp
 from nutrition_dashboard import nutrition_bp
@@ -35,40 +37,7 @@ def home():
 
 @app.route("/calories", methods=["GET", "POST"])
 def calorie_calculator():
-    calories = None
-    error = None
-    goal = None
-
-    if request.method == "POST":
-        try:
-            age = int(request.form["age"])
-            weight = float(request.form["weight"])
-            height = float(request.form["height"])
-            sex = request.form["sex"]
-            activity = float(request.form["activity"])
-            goal = request.form["goal"]
-
-            if age < 18 or age > 100 or weight <= 0 or height <= 0:
-                error = "Please enter valid details."
-            elif sex not in ("male", "female") or activity not in (1.2, 1.375, 1.55, 1.725) or goal not in ("lose", "maintain", "gain"):
-                error = "Please select valid options."
-            else:
-                if sex == "male":
-                    bmr = 10 * weight + 6.25 * height - 5 * age + 5
-                else:
-                    bmr = 10 * weight + 6.25 * height - 5 * age - 161
-
-                calories = round(bmr * activity)
-
-        except (ValueError, KeyError):
-            error = "Please check your information and try again."
-
-    return render_template(
-        "calories.html",
-        calories=calories,
-        error=error,
-        goal=goal
-    )
+    return bmi_calculator()
 
 @app.route("/bmi", methods=["GET", "POST"])
 def bmi_calculator():
@@ -82,7 +51,7 @@ def bmi_calculator():
             weight = float(request.form["weight"])
             height = float(request.form["height"])
 
-            if weight <= 0 or height <= 0:
+            if not math.isfinite(weight) or not math.isfinite(height) or weight <= 0 or height <= 0:
                 raise ValueError("Please enter valid measurements.")
 
             height_m = height / 100
@@ -105,9 +74,9 @@ def bmi_calculator():
             age = float(age_raw) if age_raw else None
             activity = float(activity_raw) if activity_raw else None
 
-            if age_raw and (age is None or age < 18 or age > 100):
+            if age_raw and (age is None or not math.isfinite(age) or age < 18 or age > 100):
                 raise ValueError("Please enter a valid age between 18 and 100.")
-            if activity_raw and (activity is None or activity < 1 or activity > 2.5):
+            if activity_raw and (activity is None or not math.isfinite(activity) or activity < 1 or activity > 2.5):
                 raise ValueError("Please select a valid activity level.")
             if goal not in ("lose", "maintain", "gain"):
                 raise ValueError("Please select a valid weight goal.")
@@ -206,8 +175,8 @@ def positive_number(payload, name):
         value = float(value)
     except (TypeError, ValueError):
         raise ValueError("%s must be a number" % name)
-    if value < 0:
-        raise ValueError("%s cannot be negative" % name)
+    if not math.isfinite(value) or value < 0:
+        raise ValueError("%s must be a finite non-negative number" % name)
     return value
 
 
@@ -227,6 +196,8 @@ def analyze_nutrition():
 
         if quantity_g is None:
             raise ValueError("quantity_g is required")
+        if quantity_g == 0:
+            raise ValueError("quantity_g must be greater than zero")
         if label_basis not in ("100g", "serving"):
             raise ValueError("label_basis must be 100g or serving")
         if label_basis == "serving":

@@ -1,81 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NutriCare - Your Health Companion</title>
+    <meta name="theme-color" content="#f6f7f2">
+    <title>NutriCare — everyday health, made clearer</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
-<body>
-    <nav class="home-nav">
-        <h2>NutriCare</h2>
-        <div class="nav-links">
-            <a href="/">Home</a>
-            <a href="/health/nutrition">Nutrition</a>
-            <a href="/health">Health</a>
-        </div>
-    </nav>
+<body class="landing-page">
+    <header class="landing-header">
+        <a class="wordmark" href="/" aria-label="NutriCare home">
+            <span class="brand-mark" aria-hidden="true">n</span>
+            <span>nutricare</span>
+        </a>
+        <nav class="landing-nav" aria-label="Main navigation">
+            <a href="#how-it-helps">How it helps</a>
+            <a href="/health">My health</a>
+            <a href="/health/nutrition">Nutrition log</a>
+        </nav>
+        <a class="header-cta" href="/bmi">Get started <span aria-hidden="true">↗</span></a>
+    </header>
 
     <main>
-        <section class="welcome home-hero">
-            <span class="eyebrow">Your personal wellness dashboard</span>
-            <h1>Health, nutrition and progress — in one place</h1>
-            <p>Track what you eat, understand your body measurements, and view a clear overall summary.</p>
-            <a class="button" href="/health/nutrition">Open Nutrition Log</a>
-        </section>
+        <section class="landing-hero">
+            <div class="hero-copy">
+                <p class="hero-kicker"><span></span> A little more in tune with yourself</p>
+                <h1>Small steps.<br><em>Better days.</em></h1>
+                <p class="hero-description">A simple place to keep an eye on what you eat, how you feel, and the habits you’re building.</p>
+                <div class="hero-actions">
+                    <a class="primary-link" href="/health">Explore your health <span aria-hidden="true">→</span></a>
+                    <a class="quiet-link" href="/health/nutrition">Add a meal</a>
+                </div>
+                <p class="hero-footnote">No pressure to be perfect. Just a clearer picture, one day at a time.</p>
+            </div>
 
-        <section class="features home-features" id="features">
-            <h2>Choose what you want to manage</h2>
-            <div class="cards home-cards">
-                <article class="card module-card nutrition-card">
-                    <span class="module-number">01</span>
-                    <h3>Nutrition</h3>
-                    <p>Scan or add packaged food labels, calculate nutrients for the portion eaten, and log your daily intake.
-                    </p>
-                    <ul>
-                        <li>Nutrition label scanner</li>
-                        <li>Daily nutrient totals</li>
-                        <li>Ingredients and disease suitability</li>
-                    </ul>
-                    <a class="card-action" href="/health/nutrition">Open Nutrition →</a>
-                </article>
-
-                <article class="card module-card health-card">
-                    <span class="module-number">02</span>
-                    <h3>Health</h3>
-                    <p>Track weight, height, BMI, water, sleep, steps and calories to understand how your health changes over
-                        time.</p>
-                    <ul>
-                        <li>BMI and weight trend</li>
-                        <li>Daily calories and steps</li>
-                        <li>Water and sleep tracking</li>
-                    </ul>
-                    <a class="card-action" href="/health">Open Health →</a>
-                </article>
-
-                <article class="card module-card analysis-card">
-                    <span class="module-number">03</span>
-                    <h3>Overall Analysis</h3>
-                    <p>Combine nutrition and health data for a simple summary of progress, patterns and areas to improve.
-                    </p>
-                    <ul>
-                        <li>Weight gain or loss trend</li>
-                        <li>Nutrition against daily intake</li>
-                        <li>Activity and lifestyle insights</li>
-                    </ul>
-                    <a class="card-action" href="/health">View Health Analysis →</a>
-                </article>
+            <div class="hero-art" aria-label="Preview of your personal health overview">
+                <div class="art-orbit orbit-one"></div>
+                <div class="art-orbit orbit-two"></div>
+                <div class="sun-shape"></div>
+                <div class="overview-card">
+                    <div class="overview-topline">
+                        <span class="overview-dot"></span>
+                        <span>Your space</span>
+                        <span class="overview-menu">···</span>
+                    </div>
+                    <p class="overview-date">A fresh start, any day</p>
+                    <h2>Your daily overview</h2>
+                    <div class="overview-rule"></div>
+                    <div class="overview-metrics">
+                        <div><span class="metric-icon meal-icon">✳</span><p>Meals</p><small>Keep a gentle note</small></div>
+                        <div><span class="metric-icon move-icon">↗</span><p>Movement</p><small>At your own pace</small></div>
+                        <div><span class="metric-icon rest-icon">☾</span><p>Rest</p><small>Make room to recharge</small></div>
+                    </div>
+                    <div class="overview-bottom"><span></span><span>Your progress, not perfection</span></div>
+                </div>
             </div>
         </section>
 
-        <section class="integration-note">
-            <h2>Wearable and smartwatch data</h2>
-            <p>Steps and activity can come from a connected watch or health platform later. NutriCare will keep a clear
-                distinction between measured device data and manually entered estimates.</p>
+        <section class="gentle-intro" id="how-it-helps">
+            <div>
+                <p class="section-label">A calmer kind of health tracker</p>
+                <h2>Everything you need.<br><em>Nothing to keep up with.</em></h2>
+            </div>
+            <p class="intro-copy">Start with one thing that matters to you. NutriCare brings your everyday food and health notes together, so patterns are easier to notice over time.</p>
+        </section>
+
+        <section class="service-grid" aria-label="NutriCare features">
+            <a class="service-card service-nutrition" href="/health/nutrition">
+                <div class="service-card-top"><span>01 / Nourish</span><span class="service-arrow">↗</span></div>
+                <div class="service-illustration nutrition-illustration" aria-hidden="true">
+                    <span class="plate plate-back"></span><span class="plate plate-front"><i></i><b></b><small></small></span>
+                </div>
+                <div class="service-card-copy"><h3>Food, without the fuss.</h3><p>Log a meal or read a packet label. See the nutrients that matter to you.</p><span class="service-action">Open nutrition <b>→</b></span></div>
+            </a>
+
+            <a class="service-card service-health" href="/health">
+                <div class="service-card-top"><span>02 / Check in</span><span class="service-arrow">↗</span></div>
+                <div class="service-illustration health-illustration" aria-hidden="true">
+                    <div class="sunrise"><span></span><i></i><b></b></div>
+                    <div class="health-note"><span>Your pace</span><strong>is the right pace.</strong><small>Move · Rest · Repeat</small></div>
+                </div>
+                <div class="service-card-copy"><h3>Make space for you.</h3><p>Keep track of weight, water, sleep and steps in a way that feels manageable.</p><span class="service-action">Open health <b>→</b></span></div>
+            </a>
+
+            <a class="service-card service-insights" href="/health">
+                <div class="service-card-top"><span>03 / Notice</span><span class="service-arrow">↗</span></div>
+                <div class="service-illustration insight-illustration" aria-hidden="true">
+                    <div class="line-chart"><span></span><span></span><span></span><span></span><svg viewBox="0 0 260 100" role="presentation"><path d="M5 78 C35 74 40 52 72 60 S112 80 140 47 S180 55 204 28 S238 30 255 12"/></svg></div>
+                    <div class="chart-caption"><span>Little things add up</span><span>↗</span></div>
+                </div>
+                <div class="service-card-copy"><h3>See the bigger picture.</h3><p>Bring your daily notes together and spot the habits that are beginning to stick.</p><span class="service-action">View your progress <b>→</b></span></div>
+            </a>
+        </section>
+
+        <section class="closing-note">
+            <span class="closing-star" aria-hidden="true">✳</span>
+            <p>Health is personal. Your journey can be, too.</p>
+            <a href="/bmi">Start with a simple check-in <span aria-hidden="true">→</span></a>
         </section>
     </main>
-</body>
 
+    <footer class="landing-footer">
+        <a class="wordmark" href="/"><span class="brand-mark" aria-hidden="true">n</span><span>nutricare</span></a>
+        <p>Gentle tools for everyday wellbeing.</p>
+        <span>Not a substitute for professional medical advice.</span>
+    </footer>
+</body>
 </html>

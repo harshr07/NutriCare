@@ -63,11 +63,11 @@
         <div class="label-scanner" id="label-scanner">
             <div>
                 <strong>Scan a nutrition label</strong>
-                <p class="muted small">Take a clear photo of the Nutrition Facts panel. Text stays in this browser and the form is filled automatically.</p>
+                <p class="muted small">Choose a clear photo of the Nutrition Facts panel. It will scan automatically and fill detected fields; text stays in this browser.</p>
             </div>
             <label class="scan-upload" for="label-photo">Choose or capture photo</label>
             <input id="label-photo" type="file" accept="image/*" capture="environment">
-            <button type="button" id="scan-label" disabled>Scan label</button>
+            <button type="button" id="scan-label" disabled>Scan again</button>
             <p class="scan-status small" id="scan-status" role="status" aria-live="polite">No photo selected</p>
             <details class="scan-text" id="scan-text-details">
                 <summary>Review scanned text</summary>
@@ -178,6 +178,6 @@
 <script type="application/json" id="week-data">{{ week | tojson }}</script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-<script src="{{ url_for('static', filename='nutrition_dashboard.js') }}"></script>
+<script src="{{ url_for('static', filename='nutrition_dashboard.js') }}?v=2"></script>
 </body>
 </html>

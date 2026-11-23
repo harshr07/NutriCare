@@ -5,23 +5,10 @@ const scannedText = document.getElementById('scanned-text');
 
 function normalizedText(text) {
   return text
-    .replace(/,/g, '.')
+    .replace(/(\d),(\d)/g, '$1.$2')
     .replace(/[—–]/g, '-')
     .replace(/\bcalories\b/gi, ' calories ')
     .replace(/\n+/g, '\n');
-}
-
-function numberBeforeUnit(text, names, unit) {
-  const namePattern = names.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
-  const patterns = [
-    new RegExp(`(?:${namePattern})\\s*[:=-]?\\s*(\\d+(?:\.\\d+)?)\\s*${unit}`, 'i'),
-    new RegExp(`(?:${namePattern})[^\\d\\n]{0,20}(\\d+(?:\.\\d+)?)\\s*${unit}`, 'i')
-  ];
-  for (const pattern of patterns) {
-    const match = text.match(pattern);
-    if (match) return match[1];
-  }
-  return null;
 }
 
 function numberAfterLabel(text, names) {
@@ -31,6 +18,29 @@ function numberAfterLabel(text, names) {
     const match = text.match(pattern);
     if (match) return match[1];
   }
+  return null;
+}
+
+function valueFromLabelLine(text, names, unit) {
+  const escapedNames = names.map(name => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const namePattern = new RegExp(`\\b(${escapedNames.join('|')})\\b`, 'i');
+  const lines = text.split('\n');
+
+  for (let index = 0; index < lines.length; index += 1) {
+    const line = lines[index];
+    const nameMatch = line.match(namePattern);
+    if (!nameMatch) continue;
+
+    let remainder = line.slice(nameMatch.index + nameMatch[0].length);
+    if (!/\d/.test(remainder) && lines[index + 1]) remainder += ` ${lines[index + 1]}`;
+    const expectedUnit = new RegExp(`(?:^|\\s|\\()([0-9]+(?:\\.[0-9]+)?)\\s*(?:${unit})\\b`, 'i');
+    const unitMatch = remainder.match(expectedUnit);
+    if (unitMatch) return unitMatch[1];
+
+    const numberMatch = remainder.match(/[^\d]{0,30}(\d+(?:\.\d+)?)/);
+    if (numberMatch) return numberMatch[1];
+  }
+
   return null;
 }
 
@@ -58,7 +68,8 @@ function parseLabel(text) {
   };
 
   for (const [field, rule] of Object.entries(fieldRules)) {
-    const value = numberBeforeUnit(cleaned, rule.names, rule.unit) || numberAfterLabel(cleaned, rule.names);
+    const value = valueFromLabelLine(cleaned, rule.names, rule.unit)
+      || numberAfterLabel(cleaned, rule.names);
     if (value !== null) values[field] = value;
   }
 
@@ -79,6 +90,13 @@ function parseLabel(text) {
     || cleaned.match(/ingredients?\s+(.{10,500})/i);
   if (ingredientsMatch) values.ingredients = ingredientsMatch[1].replace(/\s+/g, ' ').trim();
 
+  const nonProductLine = /^(nutrition facts|nutrition information|nutritional information|ingredients?\b|serving size\b|amount per serving\b|per\s*\d+\s*g\b|calories?\b|energy\b|total fat\b|saturated fat\b|trans fat\b|cholesterol\b|sodium\b|total carbohydrate\b|carbohydrate\b|dietary fiber\b|fiber\b|total sugars?\b|added sugars?\b|protein\b|vitamin\b|calcium\b|iron\b|potassium\b)/i;
+  const productLine = cleaned.split('\n')
+    .map(line => line.trim())
+    .find(line => line.length > 2 && line.length <= 120 && /[a-z]/i.test(line)
+      && !nonProductLine.test(line) && !/^\d/.test(line));
+  if (productLine) values.food_name = productLine;
+
   return values;
 }
 
@@ -92,6 +110,8 @@ function fillForm(values) {
     const basis = document.getElementById('label-basis');
     basis.value = 'serving';
     basis.dispatchEvent(new Event('change'));
+    const quantity = document.querySelector('[name="quantity_g"]');
+    if (quantity && !quantity.value && values.serving_g) quantity.value = values.serving_g;
   }
 
   const status = Object.keys(values).length
@@ -100,12 +120,7 @@ function fillForm(values) {
   scanStatus.textContent = status;
 }
 
-photoInput.addEventListener('change', () => {
-  scanButton.disabled = !photoInput.files.length;
-  scanStatus.textContent = photoInput.files.length ? 'Photo ready to scan' : 'No photo selected';
-});
-
-scanButton.addEventListener('click', async () => {
+async function scanSelectedPhoto() {
   if (!photoInput.files.length || !window.Tesseract) {
     scanStatus.textContent = 'OCR is unavailable. Try reloading with an internet connection.';
     return;
@@ -126,11 +141,23 @@ scanButton.addEventListener('click', async () => {
     document.getElementById('scan-text-details').open = true;
     fillForm(parseLabel(result.data.text));
   } catch (error) {
+    console.error('Nutrition label OCR failed:', error);
     scanStatus.textContent = 'Could not scan this photo. Try a clearer, brighter image.';
   } finally {
     scanButton.disabled = false;
   }
+}
+
+photoInput.addEventListener('change', () => {
+  scanButton.disabled = !photoInput.files.length;
+  if (photoInput.files.length) {
+    scanSelectedPhoto();
+  } else {
+    scanStatus.textContent = 'No photo selected';
+  }
 });
+
+scanButton.addEventListener('click', scanSelectedPhoto);
 
 document.getElementById('fill-from-text').addEventListener('click', () => {
   fillForm(parseLabel(scannedText.value));
@@ -158,4 +185,8 @@ if (chartData && chartCanvas && window.Chart) {
     },
     options: {responsive: true, scales: {y: {beginAtZero: true}}}
   });
+}
+
+if (!window.Tesseract) {
+  scanStatus.textContent = 'Scanner library did not load. Check your internet connection and reload.';
 }
