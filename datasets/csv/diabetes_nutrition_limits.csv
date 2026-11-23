@@ -1,0 +1,30 @@
+disease,nutrient,min-value,max-value,unit,age-group,gender
+diabetes,magnesium,,350,mg/day,adult,
+diabetes,cinnamon,,6,g/day,,
+diabetes,calories,1200,2000,kcal,adult,male
+diabetes,calories,1200,2000,kcal,adult,female
+diabetes,protein,50,100,g,adult,male
+diabetes,carbohydrates,130,250,g,adult,female
+diabetes,total sugar,0,0,g,adult,male
+diabetes,total sugar,0,0,g,adult,female
+diabetes,sodium,0,2300,mg/day,adult,all
+
+
+| Nutrient | Quantitative reference | Unit | Interpretation |
+|---|---:|---|---|
+| Total carbohydrates | Individualized | g/day | Based on energy requirements and treatment |
+| Carbohydrate choice | 15 | g/choice | Standard counting unit |
+| Added sugar | Minimize | No universal ADA maximum | Limit added sugar |
+| Dietary fibre | At least 14 per 1,000 kcal | g | ADA recommendation |
+| Protein | Individualized | g/day | No universal diabetes-specific target |
+| Total fat | Individualized | g/day | Focus on fat quality |
+| Saturated fat | Limit | — | Reduce cardiovascular risk |
+| Trans fat | Minimize | — | Avoid industrial trans fats |
+| Sodium | Less than 2,300 | mg/day | ADA recommendation |
+| Magnesium | Age/gender-dependent | mg/day | General nutritional requirement |
+| Calcium | Age/gender-dependent | mg/day | General nutritional requirement |
+| Vitamin D | Age-dependent | mcg/day | General nutritional requirement |
+| Potassium | Age/gender-dependent | mg/day | General nutritional requirement |
+| Vitamin B12 | Age-dependent | mcg/day | General nutritional requirement |
+| Zinc | Age/gender-dependent | mg/day | General nutritional requirement |
+| Iron | Age/gender-dependent | mg/day | General nutritional requirement |
