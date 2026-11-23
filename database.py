@@ -54,7 +54,7 @@ def initialize_database():
 
 def create_user(full_name, email, password):
     """Create a user account. Passwords are stored only as secure hashes."""
-    password_hash = generate_password_hash(password)
+    password_hash = generate_password_hash(password, method="pbkdf2:sha256:600000")
     conn = get_db_connection()
     try:
         cursor = conn.execute(
