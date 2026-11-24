@@ -4,10 +4,7 @@ from pathlib import Path
 
 from werkzeug.security import check_password_hash, generate_password_hash
 
-# Store the main application database in the project's instance/ directory.
-# NUTRICARE_INSTANCE_DIR can point somewhere else (the test suite uses a temp dir).
-# app.py uses this same folder as Flask's instance_path, so the account database
-# and the health/nutrition database always live side by side.
+
 BASE_DIR = Path(__file__).resolve().parent
 INSTANCE_DIR = Path(os.environ.get("NUTRICARE_INSTANCE_DIR") or (BASE_DIR / "instance")).resolve()
 DATABASE = INSTANCE_DIR / "nutricare_users.db"
@@ -35,18 +32,72 @@ def initialize_database():
                 created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS disease_nutrients (
-                disease TEXT NOT NULL,
-                nutrient TEXT NOT NULL,
-                min_value REAL,
-                max_value REAL,
-                unit TEXT,
-                age_group TEXT,
-                gender TEXT,
-                PRIMARY KEY (disease, nutrient)
-            )
-        """)
+        _migrate_disease_nutrients(conn)
+        conn.commit()
+    finally:
+        conn.close()
+
+
+def _create_disease_nutrients_table(conn, table_name="disease_nutrients"):
+    conn.execute("""
+        CREATE TABLE {} (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            disease TEXT NOT NULL,
+            nutrient TEXT NOT NULL,
+            min_value REAL,
+            max_value REAL,
+            unit TEXT,
+            age_group TEXT,
+            gender TEXT,
+            verified TEXT NOT NULL DEFAULT 'No'
+        )
+    """.format(table_name))
+
+
+def _migrate_disease_nutrients(conn):
+    table = conn.execute(
+        "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?",
+        ("disease_nutrients",),
+    ).fetchone()
+    if table is None:
+        _create_disease_nutrients_table(conn)
+    else:
+        columns = {row["name"] for row in conn.execute("PRAGMA table_info(disease_nutrients)")}
+        has_surrogate_id = any(
+            row["name"] == "id" and row["pk"] == 1
+            for row in conn.execute("PRAGMA table_info(disease_nutrients)")
+        )
+        if "verified" not in columns or not has_surrogate_id:
+            conn.execute("ALTER TABLE disease_nutrients RENAME TO disease_nutrients_legacy")
+            _create_disease_nutrients_table(conn)
+            legacy_columns = {
+                row["name"] for row in conn.execute("PRAGMA table_info(disease_nutrients_legacy)")
+            }
+            verified_expression = "verified" if "verified" in legacy_columns else "'No'"
+            conn.execute("""
+                INSERT INTO disease_nutrients
+                    (disease, nutrient, min_value, max_value, unit, age_group, gender, verified)
+                SELECT disease, nutrient, min_value, max_value, unit, age_group, gender, {}
+                FROM disease_nutrients_legacy
+            """.format(verified_expression))
+            conn.execute("DROP TABLE disease_nutrients_legacy")
+
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_disease_nutrients_lookup
+        ON disease_nutrients (disease, verified, age_group, gender)
+    """)
+
+
+def replace_disease_nutrients(rows):
+    """Replace the stored dataset atomically with parsed CSV rows."""
+    conn = get_db_connection()
+    try:
+        conn.execute("DELETE FROM disease_nutrients")
+        conn.executemany("""
+            INSERT INTO disease_nutrients
+                (disease, nutrient, min_value, max_value, unit, age_group, gender, verified)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, rows)
         conn.commit()
     finally:
         conn.close()
@@ -104,41 +155,48 @@ def add_disease_nutrient(
     unit=None,
     age_group=None,
     gender=None,
+    verified="No",
 ):
-    """Insert one disease/nutrient row."""
+    """Insert one disease/nutrient row, including its source verification status."""
     conn = get_db_connection()
     try:
         conn.execute("""
             INSERT INTO disease_nutrients
-                (disease, nutrient, min_value, max_value, unit, age_group, gender)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-        """, (disease, nutrient, min_value, max_value, unit, age_group, gender))
+                (disease, nutrient, min_value, max_value, unit, age_group, gender, verified)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (disease, nutrient, min_value, max_value, unit, age_group, gender, verified))
         conn.commit()
     finally:
         conn.close()
 
 
-def get_disease_nutrients(disease=None):
-    """Fetch all rows, or only rows matching a disease."""
+def get_disease_nutrients(disease=None, verified_only=False):
+    """Fetch dataset rows, optionally filtering by disease and verified source status."""
     conn = get_db_connection()
     try:
-        if disease is None:
-            rows = conn.execute("""
-                SELECT disease, nutrient, min_value, max_value, unit, age_group, gender
-                FROM disease_nutrients ORDER BY disease, nutrient
-            """).fetchall()
-        else:
-            rows = conn.execute("""
-                SELECT disease, nutrient, min_value, max_value, unit, age_group, gender
-                FROM disease_nutrients WHERE disease = ? ORDER BY nutrient
-            """, (disease,)).fetchall()
+        query = """
+            SELECT disease, nutrient, min_value, max_value, unit,
+                   age_group, gender, verified
+            FROM disease_nutrients
+        """
+        filters = []
+        parameters = []
+        if disease is not None:
+            filters.append("LOWER(disease) = LOWER(?)")
+            parameters.append(disease)
+        if verified_only:
+            filters.append("LOWER(verified) = 'yes'")
+        if filters:
+            query += " WHERE " + " AND ".join(filters)
+        query += " ORDER BY nutrient, age_group, gender"
+        rows = conn.execute(query, parameters).fetchall()
         return rows
     finally:
         conn.close()
 
 
 def delete_disease_nutrient(disease, nutrient):
-    """Delete one row using its composite primary key."""
+    """Delete all rows for one disease/nutrient pair."""
     conn = get_db_connection()
     try:
         cursor = conn.execute(

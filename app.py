@@ -7,7 +7,7 @@ from flask import Flask, flash, jsonify, redirect, render_template, request, ses
 
 from auth import auth_bp, current_user
 from database import INSTANCE_DIR, initialize_database
-from disease_nutrients import seed_default_disease_nutrients
+from disease_nutrients import sync_disease_nutrients_from_csv
 from health import health_bp
 from health_check import health_check_bp
 from nutrition_analysis import nutrition_analysis_bp
@@ -41,7 +41,7 @@ app.config.update(
 )
 
 initialize_database()
-seed_default_disease_nutrients()
+sync_disease_nutrients_from_csv()
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(health_bp)

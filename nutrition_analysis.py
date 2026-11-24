@@ -1,4 +1,5 @@
 import math
+import re
 
 from flask import Blueprint, jsonify, request
 
@@ -6,38 +7,34 @@ from database import get_disease_nutrients
 
 nutrition_analysis_bp = Blueprint("nutrition_analysis", __name__)
 
-DISEASE_RULES = {
-    "diabetes": {
-        "restricted_ingredients": ("added sugar", "high fructose corn syrup", "glucose syrup"),
-        "reason": "For diabetes, limit added sugar and total carbohydrates.",
-    },
-    "hypertension": {
-        "restricted_ingredients": ("monosodium glutamate", "msg", "salt"),
-        "reason": "For hypertension, keep sodium low.",
-    },
-    "heart_disease": {
-        "restricted_ingredients": ("hydrogenated oil", "partially hydrogenated oil", "trans fat"),
-        "reason": "For heart disease, limit saturated fat, trans fat, sodium, and added sugar.",
-    },
-    "kidney_disease": {
-        "restricted_ingredients": ("phosphate", "potassium chloride"),
-        "reason": "For kidney disease, monitor sodium, potassium, and protein.",
-    },
+DISEASE_ALIASES = {
+    "ckd": "chronic kidney disease",
+    "kidney disease": "chronic kidney disease",
+    "chronic kidney disease": "chronic kidney disease",
 }
 
-ALLERGEN_INGREDIENTS = {
-    "sugar": ("sugar", "sucrose", "cane sugar", "brown sugar", "dextrose", "fructose"),
-    "gluten": ("wheat", "barley", "rye", "malt", "gluten", "atta", "maida"),
-    "milk": ("milk", "milk solids", "whey", "casein", "cream", "butter"),
-    "peanut": ("peanut", "groundnut"),
-    "soy": ("soy", "soya", "soybean", "lecithin"),
+NUTRIENT_ALIASES = {
+    "energy": "calories",
+    "calories": "calories",
+    "carbohydrate": "carbs",
+    "carbohydrates": "carbs",
+    "total sugar": "sugar",
+    "total sugars": "sugar",
+    "fluid": "water",
+    "vitamin b1 thiamine": "vitamin_b1_thiamine",
+    "vitamin b2 riboflavin": "vitamin_b2_riboflavin",
 }
 
-NUTRIENT_FIELDS = (
-    "calories", "protein", "carbs", "fat", "saturated_fat", "fiber",
-    "sugar", "added_sugar", "sodium", "potassium", "calcium", "iron",
-    "vitamin_a", "vitamin_c", "vitamin_d", "vitamin_b12",
-)
+NUTRIENT_UNITS = {
+    "calories": "kcal", "energy": "kcal", "protein": "g",
+    "carbohydrate": "g", "carbohydrates": "g", "total sugar": "g",
+    "sodium": "mg", "potassium": "mg", "calcium": "mg", "iron": "mg",
+    "zinc": "mg", "magnesium": "mg", "iodine": "µg", "folate": "µg",
+    "vitamin a": "µg", "vitamin b6": "mg", "vitamin b12": "µg",
+    "vitamin b1 thiamine": "mg", "vitamin b2 riboflavin": "mg",
+    "vitamin c": "mg", "vitamin d": "µg", "cinnamon": "g", "fluid": "L",
+    "water": "L", "vitamin_b1_thiamine": "mg", "vitamin_b2_riboflavin": "mg",
+}
 
 
 class NutritionAnalysisError(ValueError):
@@ -59,76 +56,156 @@ def parse_non_negative_number(payload, field_name):
     return value
 
 
-def normalize_allergies(value):
-    if isinstance(value, str):
-        value = value.split(",")
-    if not isinstance(value, (list, tuple, set)):
-        return []
-    return [str(item).strip().lower() for item in value if str(item).strip()]
+def normalize_name(value):
+    return re.sub(r"[^a-z0-9]+", " ", str(value or "").lower()).strip()
 
 
-def scaled_nutrients(payload, scale):
-    nutrients = {}
-    for field in NUTRIENT_FIELDS:
-        value = parse_non_negative_number(payload, "%s_per_label" % field)
+def normalize_unit(value):
+    unit = str(value or "").strip().lower()
+    unit = unit.replace("μ", "µ").replace("mcg", "µg")
+    unit = re.sub(r"\s*(/\s*day|per\s+day)$", "", unit)
+    return re.sub(r"\s+", "", unit)
+
+
+def nutrient_field(nutrient):
+    normalized = normalize_name(nutrient)
+    if normalized in NUTRIENT_ALIASES:
+        return NUTRIENT_ALIASES[normalized]
+    return normalized.replace(" ", "_")
+
+
+def read_nutrient_value(payload, nutrient, scale, target_unit):
+    field = nutrient_field(nutrient)
+    value = parse_non_negative_number(payload, "%s_per_label" % field)
+    if value is None:
+        value = parse_non_negative_number(payload, field)
+    if value is None:
+        return None
+
+    source_unit = payload.get("%s_unit" % field) or NUTRIENT_UNITS.get(normalize_name(nutrient))
+    return convert_nutrient_unit(value * scale, source_unit, target_unit, nutrient)
+
+
+def convert_nutrient_unit(value, source_unit, target_unit, nutrient):
+    if not source_unit:
+        return value
+
+    source = normalize_unit(source_unit)
+    target = normalize_unit(target_unit)
+    if target.startswith("g/kg"):
+        target = "g"
+    if source == target:
+        return value
+    if source == "g" and target == "mg":
+        return value * 1000
+    if source == "mg" and target == "g":
+        return value / 1000
+    if source in ("µg", "ug") and target == "mg":
+        return value / 1000
+    if source == "mg" and target in ("µg", "ug"):
+        return value * 1000
+    if normalize_name(nutrient) == "vitamin d" and source == "µg" and target == "iu":
+        return value * 40
+    if normalize_name(nutrient) == "vitamin d" and source == "iu" and target == "µg":
+        return value / 40
+    return value
+
+
+def evaluate_limits(payload, disease, scale):
+    rows = [
+        row for row in get_disease_nutrients(verified_only=True)
+        if normalize_name(row["disease"]) == disease
+    ]
+    checks = []
+    profile_required = set()
+
+    age_group = normalize_name(payload.get("age_group"))
+    if not age_group and payload.get("age") not in (None, ""):
+        age = parse_non_negative_number(payload, "age")
+        age_group = "adult" if age is not None and age >= 18 else "under 18"
+    gender = normalize_name(payload.get("gender"))
+
+    grouped_rows = {}
+    for row in rows:
+        if row["min_value"] is None and row["max_value"] is None:
+            continue
+        key = (normalize_name(row["nutrient"]), normalize_unit(row["unit"]))
+        grouped_rows.setdefault(key, []).append(row)
+
+    for nutrient_rows in grouped_rows.values():
+        first = nutrient_rows[0]
+        nutrient = str(first["nutrient"])
+        unit = first["unit"] or ""
+        value = read_nutrient_value(payload, nutrient, scale, unit)
         if value is None:
-            value = parse_non_negative_number(payload, field)
-        nutrients[field] = round(value * scale, 3) if value is not None else None
-    return nutrients
-
-
-def assess_ingredients(ingredients, allergies, disease):
-    warnings = []
-    detected_allergens = []
-    suitable = True
-
-    for allergen in allergies:
-        terms = ALLERGEN_INGREDIENTS.get(allergen, (allergen,))
-        if any(term in ingredients for term in terms):
-            detected_allergens.append(allergen)
-
-    if detected_allergens:
-        warnings.append("Allergen detected: %s" % ", ".join(detected_allergens))
-        suitable = False
-
-    disease_rule = DISEASE_RULES.get(disease)
-    if disease_rule:
-        restricted = [
-            term for term in disease_rule["restricted_ingredients"]
-            if term in ingredients
-        ]
-        if restricted:
-            warnings.append("Restricted ingredient detected: %s" % ", ".join(restricted))
-            suitable = False
-        warnings.insert(0, disease_rule["reason"])
-    elif disease:
-        warnings.append("Unknown disease constraint; no disease-specific rule applied.")
-
-    return detected_allergens, warnings, suitable
-
-
-def assess_nutrient_limits(disease, nutrients):
-    warnings = []
-    suitable = True
-
-    for row in get_disease_nutrients(disease):
-        nutrient = str(row["nutrient"])
-        value = nutrients.get(nutrient)
-        maximum = row["max_value"]
-        if value is None or maximum is None or value <= float(maximum):
             continue
 
-        unit = row["unit"] or ""
-        warnings.append("%s exceeds the portion limit: %.2f > %.2f %s" % (
-            nutrient, value, float(maximum), unit
-        ))
-        suitable = False
+        available_age_groups = {
+            normalize_name(row["age_group"]) for row in nutrient_rows if row["age_group"]
+        }
+        if available_age_groups:
+            if not age_group:
+                profile_required.add("age")
+                continue
+            nutrient_rows = [
+                row for row in nutrient_rows
+                if not row["age_group"] or normalize_name(row["age_group"]) == age_group
+            ]
+            if not nutrient_rows:
+                continue
 
-    return warnings, suitable
+        gender_rows = [row for row in nutrient_rows if row["gender"]]
+        if gender and gender_rows:
+            nutrient_rows = [
+                row for row in nutrient_rows
+                if not row["gender"] or normalize_name(row["gender"]) == gender
+            ]
+            if not nutrient_rows:
+                continue
+        elif not gender and gender_rows:
+            bounds = {
+                (row["min_value"], row["max_value"])
+                for row in gender_rows
+            }
+            genders = {normalize_name(row["gender"]) for row in gender_rows}
+            if len(bounds) > 1 or genders != {"male", "female"}:
+                profile_required.add("gender")
+                continue
+            nutrient_rows = [gender_rows[0]]
+
+        row = nutrient_rows[0]
+        minimum = row["min_value"]
+        maximum = row["max_value"]
+        if normalize_unit(unit) == "g/kgbodyweight":
+            body_weight = parse_non_negative_number(payload, "body_weight_kg")
+            if body_weight is None:
+                profile_required.add("body_weight_kg")
+                continue
+            minimum = minimum * body_weight if minimum is not None else None
+            maximum = maximum * body_weight if maximum is not None else None
+            unit = "g/day"
+
+        above_maximum = maximum is not None and value > maximum
+        below_minimum = minimum is not None and value < minimum
+        status = "above_maximum" if above_maximum else "below_minimum" if below_minimum else "within_range"
+        checks.append({
+            "nutrient": nutrient,
+            "value": round(value, 3),
+            "minimum": minimum,
+            "maximum": maximum,
+            "unit": unit,
+            "age_group": row["age_group"],
+            "gender": row["gender"],
+            "status": status,
+            "limit_crossed": above_maximum,
+        })
+
+    return checks, sorted(profile_required)
 
 
 def analyze_payload(payload):
-    disease = str(payload.get("disease", "")).strip().lower().replace(" ", "_")
+    disease = normalize_name(payload.get("disease"))
+    disease = DISEASE_ALIASES.get(disease, disease)
     quantity_g = parse_non_negative_number(payload, "quantity_g")
     label_basis = str(payload.get("label_basis", "100g")).strip().lower()
     serving_g = parse_non_negative_number(payload, "serving_g")
@@ -146,25 +223,20 @@ def analyze_payload(payload):
     else:
         scale = quantity_g / 100.0
 
-    nutrients = scaled_nutrients(payload, scale)
-    ingredients = str(payload.get("ingredients", "")).lower()
-    allergies = normalize_allergies(payload.get("allergies", []))
-    detected_allergens, warnings, suitable = assess_ingredients(ingredients, allergies, disease)
-
-    if disease in DISEASE_RULES:
-        limit_warnings, within_limits = assess_nutrient_limits(disease, nutrients)
-        warnings.extend(limit_warnings)
-        suitable = suitable and within_limits
-
+    checks, profile_required = evaluate_limits(payload, disease, scale)
+    crossed_limits = any(check["limit_crossed"] for check in checks)
+    below_minimum = any(check["status"] == "below_minimum" for check in checks)
+    if checks:
+        status = "limit_crossed" if crossed_limits else "below_minimum" if below_minimum else "within_limits"
+    else:
+        status = "profile_required" if profile_required else "no_verified_limits"
     return {
-        "suitable": suitable,
-        "status": "suitable" if suitable else "unsuitable",
+        "limit_crossed": crossed_limits,
+        "status": status,
         "disease": disease or None,
-        "allergens_detected": detected_allergens,
-        "warnings": warnings,
-        "quantity_g": quantity_g,
-        "consumed_nutrients": nutrients,
-        "note": "This is a basic rule-based estimate, not medical advice.",
+        "checks": checks,
+        "profile_required": profile_required,
+        "source": "datasets/csv/overall_disease_nutrition.csv (verified rows only)",
     }
 
 
@@ -175,8 +247,6 @@ def json_payload():
 def legacy_payload(payload):
     compatible_payload = dict(payload)
     compatible_payload["quantity_g"] = payload.get("portion_size_g", payload.get("quantity_g"))
-    if payload.get("food_items") and not payload.get("ingredients"):
-        compatible_payload["ingredients"] = ", ".join(str(item) for item in payload["food_items"])
     compatible_payload.setdefault("label_basis", "100g")
     return compatible_payload
 
