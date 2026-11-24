@@ -55,6 +55,12 @@ def current_user_id():
     return session["user_id"]
 
 
+def health_dashboard_redirect():
+    """Return to the same health history range after a form submission."""
+    days = 30 if request.form.get("days") == "30" else 7
+    return redirect(url_for("health.dashboard", days=days))
+
+
 def number(form, name, minimum, maximum, integer=False):
     raw = form.get(name, "").strip()
     if not raw:
@@ -122,7 +128,7 @@ def save_health_log():
         return "A log already exists for this date. Edit it below instead.", 400
     finally:
         db.close()
-    return redirect(url_for("health.dashboard"))
+    return health_dashboard_redirect()
 
 
 @health_bp.route("/health/edit/<int:log_id>", methods=["POST"])
@@ -142,7 +148,7 @@ def update_health_log(log_id):
         return "Another log already exists for that date.", 400
     finally:
         db.close()
-    return redirect(url_for("health.dashboard"))
+    return health_dashboard_redirect()
 
 
 @health_bp.route("/health/delete/<int:log_id>", methods=["POST"])
@@ -151,7 +157,7 @@ def delete_health_log(log_id):
     db.execute("DELETE FROM health_logs WHERE id=? AND user_id=?", (log_id, current_user_id()))
     db.commit()
     db.close()
-    return redirect(url_for("health.dashboard"))
+    return health_dashboard_redirect()
 
 
 @health_bp.route("/health/export")

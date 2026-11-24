@@ -17,6 +17,7 @@
     <section class="panel">
       <h2>Add today's record</h2>
       <form action="{{ url_for('health.save_health_log') }}" method="post" class="form-grid">
+        <input type="hidden" name="days" value="{{ days }}">
         <label>Date<input name="date" type="date" value="{{ today }}" max="{{ today }}" required></label>
         <label>Weight (kg)<input name="weight" type="number" min="1" max="500" step="0.1" placeholder="e.g. 75"></label>
         <label>Water (litres)<input name="water" type="number" min="0" max="20" step="0.1" placeholder="e.g. 2.5"></label>
@@ -49,6 +50,7 @@
         {% for item in records|reverse %}
           <details><summary>{{ item.date }} — Click to edit</summary>
             <form method="post" action="{{ url_for('health.update_health_log', log_id=item.id) }}" class="form-grid">
+              <input type="hidden" name="days" value="{{ days }}">
               <label>Date<input name="date" type="date" max="{{ today }}" value="{{ item.date }}" required></label>
               <label>Weight<input name="weight" type="number" step="0.1" min="1" max="500" value="{{ item.weight if item.weight is not none else '' }}"></label>
               <label>Water<input name="water" type="number" step="0.1" min="0" max="20" value="{{ item.water if item.water is not none else '' }}"></label>
@@ -57,7 +59,7 @@
               <label>Calories<input name="calories" type="number" min="0" max="20000" value="{{ item.calories if item.calories is not none else '' }}"></label>
               <button type="submit">Save changes</button>
             </form>
-            <form action="{{ url_for('health.delete_health_log', log_id=item.id) }}" method="post" onsubmit="return confirm('Delete this record?')"><button type="submit" class="danger">Delete record</button></form>
+            <form action="{{ url_for('health.delete_health_log', log_id=item.id) }}" method="post" onsubmit="return confirm('Delete this record?')"><input type="hidden" name="days" value="{{ days }}"><button type="submit" class="danger">Delete record</button></form>
           </details>
         {% endfor %}
       </section>
