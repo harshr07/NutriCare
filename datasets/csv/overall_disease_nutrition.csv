@@ -120,8 +120,8 @@ fever,Potassium,,,mg/day,Adult,Female,No
 diabetes,calories,1200.0,2000.0,kcal,Adult,Male,Yes
 diabetes,calories,1200.0,2000.0,kcal,Adult,Female,Yes
 diabetes,carbohydrates,130.0,250.0,g,Adult,Female,Yes
-diabetes,total sugar,0.0,0.0,g,Adult,Male,Yes
-diabetes,total sugar,0.0,0.0,g,Adult,Female,Yes
+diabetes,total sugar,0.0,0.0,g,Adult,Male,No
+diabetes,total sugar,0.0,0.0,g,Adult,Female,No
 Chronic Kidney Disease,Protein,0.8,0.8,g/kg body weight/day,Adult,Male,Yes
 Chronic Kidney Disease,Sodium,,2300.0,mg/day,Adult,Male,Yes
 diabetes,Magnesium,,350.0,mg/day,Adult,Male,Yes

@@ -3,6 +3,7 @@ import math
 from flask import Blueprint, flash, redirect, render_template, request, session, url_for
 from daily_limits import available_conditions, limit_report
 from nutrition_analysis import normalize_name
+from food_safety import FOOD_SAFETY_DISEASES, get_food_safety_preferences
 from nutrition_storage import (
     NUTRIENTS, entries_from, entries_on, get_profile, latest_weight, remove_entry, save_entry, save_profile,
 )
@@ -69,7 +70,10 @@ def build_entry(form):
         "entry_date": day,
         "food_name": name,
         "food_type": food_type,
-        "ingredients": form.get("ingredients", "").strip()[:500],
+        "ingredients": form.get("ingredients", "").strip()[:5000],
+        "contains_text": form.get("contains_text", "").strip()[:1000],
+        "may_contain_text": form.get("may_contain_text", "").strip()[:1000],
+        "raw_label_text": form.get("raw_label_text", "").strip()[:10000],
         "source": None,
         "quantity_g": quantity,
         "label_basis": basis,
@@ -151,6 +155,8 @@ def dashboard_page(day, error=None, profile_error=None):
         conditions=available_conditions(), profile=get_profile(session["user_id"]),
         saved_weight=latest_weight(session["user_id"]), profile_error=profile_error,
         limit_report=report_for(records, day),
+        food_safety_diseases=FOOD_SAFETY_DISEASES,
+        food_safety_preferences=get_food_safety_preferences(session["user_id"]),
     )
 
 
