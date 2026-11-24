@@ -10,7 +10,7 @@
 <body>
 <header>
     <a class="brand" href="/"> NutriCare</a>
-    <nav><a href="/health">My Health</a><a href="{{ url_for('nutrition.dashboard') }}">Nutrition Log</a></nav>
+    <nav><a href="/health">Health</a><a href="{{ url_for('nutrition.dashboard') }}">Nutrition</a></nav>
     {% include '_account_strip.html' %}
 </header>
 {% include '_flash_messages.html' %}
@@ -129,6 +129,7 @@
         <p class="muted small">Select your health conditions and add ingredients you personally want to avoid. Allergy information is kept separate.</p>
         <form method="post" action="{{ url_for('food_safety.save_food_safety_profile_route') }}">
             <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
+            <input type="hidden" name="date" value="{{ selected_date }}">
             <h3>My health conditions</h3>
             <div class="form-grid">
                 {% for item in food_safety_diseases %}

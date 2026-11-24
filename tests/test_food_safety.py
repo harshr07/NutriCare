@@ -1,5 +1,10 @@
 import unittest
+import uuid
+from datetime import date, timedelta
 
+import support
+from app import app
+from support import register
 from food_safety import analyze_label_payload, parse_label_sections
 
 
@@ -71,6 +76,44 @@ class FoodSafetyTests(unittest.TestCase):
         self.assertIn("wheat flour", sections["ingredients"])
         self.assertIn("milk", sections["contains"])
         self.assertIn("peanuts", sections["may_contain"])
+
+
+class RedirectPreservationTests(unittest.TestCase):
+    def setUp(self):
+        app.config["TESTING"] = True
+        self.client = app.test_client()
+        register(self.client, "redirect-{}@example.com".format(uuid.uuid4().hex))
+
+    def test_food_safety_profile_keeps_selected_nutrition_date(self):
+        selected_day = (date.today() - timedelta(days=1)).isoformat()
+        token = support.csrf_token(
+            self.client, "/health/nutrition?date=" + selected_day
+        )
+        response = self.client.post("/health/nutrition/food-safety/profile", data={
+            "csrf_token": token,
+            "date": selected_day,
+            "diseases": ["celiac_disease"],
+            "avoid_ingredients": "",
+            "allergies": "",
+            "ckd_stage": "",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.headers["Location"],
+            "/health/nutrition?date={0}#food-safety-profile".format(selected_day),
+        )
+
+    def test_health_log_keeps_selected_history_range(self):
+        selected_day = (date.today() - timedelta(days=1)).isoformat()
+        token = support.csrf_token(self.client, "/health?days=30")
+        response = self.client.post("/health/add", data={
+            "csrf_token": token,
+            "date": selected_day,
+            "weight": "65",
+            "days": "30",
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/health?days=30")
 
 
 if __name__ == "__main__":

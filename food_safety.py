@@ -586,9 +586,15 @@ def valid_csrf(token):
     methods=["POST"]
 )
 def save_food_safety_profile_route():
+    # Keep the day the user was viewing and return to the same profile panel
+    # for both successful and rejected submissions.
+    return_url = url_for(
+        "nutrition.dashboard", date=request.form.get("date") or None
+    ) + "#food-safety-profile"
+
     if not valid_csrf(request.form.get("csrf_token", "")):
         flash("Form expired. Please try again.", "error")
-        return redirect(url_for("nutrition.dashboard"))
+        return redirect(return_url)
 
     try:
         save_food_safety_preferences(
@@ -596,12 +602,10 @@ def save_food_safety_profile_route():
         )
     except ValueError as exc:
         flash(str(exc), "error")
-        return redirect(url_for("nutrition.dashboard"))
+        return redirect(return_url)
 
     flash("Your food safety preferences have been saved.", "success")
-    return redirect(
-        url_for("nutrition.dashboard") + "#food-safety-profile"
-    )
+    return redirect(return_url)
 
 
 @food_safety_bp.route(
