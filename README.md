@@ -25,6 +25,17 @@ Open `http://127.0.0.1:5000` in a browser. You will be sent to the login page fi
 
 `POST /nutrition/analyze` returns per-nutrient status (`above_maximum`, `below_minimum`, or `within_range`), a top-level `limit_crossed` flag, and any required profile fields. This is a threshold comparison from the CSV—not a medical recommendation or a guarantee that a food is suitable.
 
+## Daily limits in the nutrition log
+
+On **Nutrition Log** (`/health/nutrition`) each user saves a health condition, gender, age and an optional body weight (`/health/nutrition/profile`). The profile is stored per user in `nutrition_profiles` in `instance/health.db`. The condition list is built from the verified rows in `disease_nutrients`.
+
+The day's logged foods are totalled and compared with the per-day limits for that condition using the same rules as `/nutrition/analyze` (`daily_limits.py` calls `evaluate_limits`). The page shows a bar per checked nutrient (within range, close to the limit, over the limit, or below a minimum). When adding a food pushes a nutrient over its daily limit, a warning is shown at once and stays on the page for that day.
+
+- Only nutrients the user has logged are checked; a missing nutrient is never treated as zero.
+- Minimums are shown as goals today and as "below the daily minimum" for finished days.
+- If a limit is per kg of body weight, the weight entered in the profile is used, otherwise the latest weight from My Health.
+- Only nutrients that the nutrition log tracks can be checked; dataset rows for others (for example magnesium or zinc) are ignored.
+
 ## Run tests
 
 ```sh

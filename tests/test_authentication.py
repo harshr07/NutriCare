@@ -4,10 +4,11 @@ import unittest
 import uuid
 from datetime import date
 
-import _support  # noqa: F401  (must be imported before app: isolates the databases)
-from _support import csrf_token, login, logout
+import support as _support  # noqa: F401  (sets test database before importing app)
+from support import csrf_token, login, logout
 from app import app
 from database import get_user_by_email
+from nutrition_storage import entries_on
 
 
 def register(client, email, password="safe-password-123"):
@@ -167,7 +168,8 @@ class LoginFlowTests(unittest.TestCase):
         register(self.client, self.email)
         response = self.client.post("/nutrition/analyze", json={"quantity_g": 100, "sodium": 200})
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.get_json()["consumed_nutrients"]["sodium"], 200)
+        self.assertFalse(response.get_json()["limit_crossed"])
+        self.assertEqual(response.get_json()["checks"], [])
 
 
 class PerUserDataTests(unittest.TestCase):
@@ -206,12 +208,48 @@ class PerUserDataTests(unittest.TestCase):
         self.assertNotIn(b"61.2", export)
 
     def test_nutrition_entries_are_private(self):
-        self.alice.post("/health/nutrition/add", data={
+        response = self.alice.post("/health/nutrition/add", data={
             "food_name": "Alice Secret Snack", "food_type": "packaged", "entry_date": self.today,
             "quantity_g": "50", "label_basis": "100g", "calories": "400",
+            "protein": "8", "ingredients": "oats, peanuts, salt",
         })
+        self.assertEqual(response.status_code, 302)
         self.assertIn(b"Alice Secret Snack", self.alice.get("/health/nutrition").data)
         self.assertNotIn(b"Alice Secret Snack", self.bob.get("/health/nutrition").data)
+
+    def test_manual_meal_without_photo_shows_all_nutrients_and_ingredients(self):
+        response = self.alice.post("/health/nutrition/add", data={
+            "food_name": "Home lunch", "food_type": "homemade", "entry_date": self.today,
+            "quantity_g": "250", "label_basis": "100g", "calories": "180",
+            "protein": "7", "carbs": "28", "fat": "4", "sodium": "320",
+            "ingredients": "rice, lentils, tomato",
+            "cost_rupees": "99", "source": "should be ignored",
+        })
+        self.assertEqual(response.status_code, 302)
+        with self.alice.session_transaction() as client_session:
+            user_id = client_session["user_id"]
+        with app.app_context():
+            saved_entries = entries_on(self.today, user_id)
+        self.assertIsNone(saved_entries[0]["cost_rupees"])
+        self.assertIsNone(saved_entries[0]["source"])
+
+        page = self.alice.get("/health/nutrition")
+        self.assertEqual(page.status_code, 200)
+        self.assertIn(b"Home lunch", page.data)
+        self.assertIn(b"rice, lentils, tomato", page.data)
+        self.assertIn(b"View ingredients and all nutrients", page.data)
+        self.assertIn(b"Protein", page.data)
+        self.assertIn(b"Calories", page.data)
+        self.assertIn(b"history-nutrient", page.data)
+        self.assertIn(b"vitamin_b12", page.data)
+        self.assertNotIn(b'name="cost_rupees"', page.data)
+        self.assertNotIn(b'name="source"', page.data)
+        self.assertIn(b"choose a clear photo", page.data)
+        self.assertIn(b"Today's nutrition so far", page.data)
+
+        historical_day = "2026-11-23"
+        historical = self.alice.get("/health/nutrition?date=" + historical_day)
+        self.assertIn(("Nutrition for " + historical_day).encode(), historical.data)
 
 
 if __name__ == "__main__":

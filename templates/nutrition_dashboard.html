@@ -54,9 +54,84 @@
         </div>
     </section>
 
+    <section class="panel" id="condition">
+        <h2>Daily limits for your health condition</h2>
+        {% if profile_error %}<p class="error" role="alert">{{ profile_error }}</p>{% endif %}
+
+        {% if not profile %}
+        <p class="muted">Tell NutriCare your health condition. Every food you add is then checked against the daily limits for that condition.</p>
+        {% else %}
+        <p class="muted small">Checking <strong>{{ selected_date }}</strong> against daily limits for <strong>{{ limit_report.label }}</strong>. Only nutrients you have logged are checked.</p>
+
+        {% if limit_report.exceeded %}
+        <div class="limit-alert" role="alert">
+            <strong>Daily limit crossed:</strong>
+            {% for row in limit_report.exceeded %}{{ row.name }} ({{ row.value }} {{ row.unit }}, limit {{ row.range_text }}){% if not loop.last %}; {% endif %}{% endfor %}.
+            Please avoid more of this nutrient today and follow your doctor's or dietitian's advice.
+        </div>
+        {% endif %}
+
+        {% if limit_report.needs %}
+        <p class="limit-note">To check every limit, add {{ limit_report.needs | join(' and ') }} in the form below{% if saved_weight is none %} or log your weight in My Health{% endif %}.</p>
+        {% endif %}
+
+        {% if limit_report.rows %}
+        <ul class="limit-list">
+            {% for row in limit_report.rows %}
+            <li class="limit-row {{ row.state }}">
+                <div class="limit-head"><strong>{{ row.name }}</strong><span>{{ row.value }} {{ row.unit }} &middot; {{ row.range_text }}</span></div>
+                <div class="meter" role="img" aria-label="{{ row.name }}: {{ row.percent }} percent of the daily reference"><span class="meter-fill {{ row.state }}" style="width: {{ row.percent }}%"></span></div>
+                <small>{{ row.message }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+        {% elif not limit_report.needs %}
+        <p class="muted">No logged nutrient has a verified limit for this condition yet. Add foods with nutrition values to see your progress.</p>
+        {% endif %}
+        {% endif %}
+
+        <details class="condition-form" {% if not profile or profile_error %}open{% endif %}>
+            <summary>{% if profile %}Change condition or profile{% else %}Choose your condition{% endif %}</summary>
+            <form action="{{ url_for('nutrition.save_condition') }}" method="post">
+                <input type="hidden" name="date" value="{{ selected_date }}">
+                <div class="form-grid">
+                    <label>Health condition
+                        <select name="disease" required>
+                            <option value="" {% if not profile %}selected{% endif %} disabled>Select condition</option>
+                            {% for item in conditions %}
+                            <option value="{{ item.value }}" {% if profile and profile.disease == item.value %}selected{% endif %}>{{ item.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </label>
+                    <label>Gender
+                        <select name="gender" required>
+                            <option value="" {% if not profile %}selected{% endif %} disabled>Select</option>
+                            <option value="male" {% if profile and profile.gender == 'male' %}selected{% endif %}>Male</option>
+                            <option value="female" {% if profile and profile.gender == 'female' %}selected{% endif %}>Female</option>
+                        </select>
+                    </label>
+                    <label>Age (years)
+                        <input type="number" name="age" min="1" max="120" step="1" value="{{ profile.age if profile else '' }}" required>
+                    </label>
+                    <label>Body weight in kg (optional)
+                        <input type="number" name="body_weight_kg" min="20" max="400" step="any" value="{{ profile.body_weight_kg if profile and profile.body_weight_kg is not none else '' }}" placeholder="{{ saved_weight if saved_weight is not none else 'e.g. 62' }}">
+                    </label>
+                </div>
+                <p class="muted small">Weight is only needed for limits given per kg (for example kidney-disease protein). If left blank, your latest weight from My Health is used.</p>
+                <button type="submit">Save condition</button>
+            </form>
+        </details>
+        <p class="muted small">Limits come from the verified rows of the project's nutrition dataset and are per day. This is a threshold check, not medical advice.</p>
+    </section>
+
     <section class="panel" id="add-food">
         <h2>Add a food</h2>
         <p class="muted small">Add a meal manually without a photo, or optionally scan a packet label. Enter known nutrition values and leave the rest blank.</p>
+        {% if profile %}
+        <p class="condition-note">Daily limits checked for: <strong>{{ limit_report.label }}</strong> <a href="#condition">change</a></p>
+        {% else %}
+        <p class="condition-note missing">Which health condition do you have? <a href="#condition">Choose it first</a> to get a warning when you cross a daily limit.</p>
+        {% endif %}
         {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 
         <div class="label-scanner" id="label-scanner">
