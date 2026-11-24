@@ -4,6 +4,8 @@ from flask import current_app
 
 
 NUTRIENTS = {
+    "trans_fat": ("Trans fat", "g"),
+    "phosphorus": ("Phosphorus", "mg"),
     "calories": ("Calories", "kcal"),
     "protein": ("Protein", "g"),
     "carbs": ("Carbohydrates", "g"),
@@ -46,6 +48,16 @@ def get_connection():
         )
     """)
     columns_present = {row["name"] for row in db.execute("PRAGMA table_info(nutrition_entries)")}
+    extra_columns = {
+        "raw_label_text": "TEXT",
+        "contains_text": "TEXT",
+        "may_contain_text": "TEXT",
+        "trans_fat": "REAL",
+        "phosphorus": "REAL",
+    }
+    for column, data_type in extra_columns.items():
+        if column not in columns_present:
+            db.execute(f"ALTER TABLE nutrition_entries ADD COLUMN {column} {data_type}")
     if "user_id" not in columns_present:
         # Preserve legacy rows, but keep them outside every newly registered user's view.
         db.execute("ALTER TABLE nutrition_entries ADD COLUMN user_id INTEGER")
@@ -106,8 +118,11 @@ def latest_weight(user_id):
 
 
 def save_entry(entry, user_id):
-    fields = ["user_id", "entry_date", "food_name", "food_type", "ingredients", "source",
-              "quantity_g", "label_basis", "serving_g", "cost_rupees"] + list(NUTRIENTS)
+    fields = [
+        "user_id", "entry_date", "food_name", "food_type", "ingredients",
+        "contains_text", "may_contain_text", "raw_label_text", "source",
+        "quantity_g", "label_basis", "serving_g", "cost_rupees",
+    ] + list(NUTRIENTS)
     placeholders = ", ".join("?" for _ in fields)
     with_db = get_connection()
     try:

@@ -8,6 +8,7 @@ from flask import Flask, flash, jsonify, redirect, render_template, request, ses
 from auth import auth_bp, current_user
 from database import INSTANCE_DIR, initialize_database
 from disease_nutrients import sync_disease_nutrients_from_csv
+from food_safety import food_safety_bp, initialize_food_safety_db
 from health import health_bp
 from health_check import health_check_bp
 from nutrition_analysis import nutrition_analysis_bp
@@ -42,18 +43,22 @@ app.config.update(
 
 initialize_database()
 sync_disease_nutrients_from_csv()
+with app.app_context():
+    initialize_food_safety_db()
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(health_bp)
 app.register_blueprint(health_check_bp)
 app.register_blueprint(nutrition_analysis_bp)
 app.register_blueprint(nutrition_bp)
+app.register_blueprint(food_safety_bp)
 
 
 # JSON endpoints answer with a 401 instead of redirecting to the HTML login page.
 API_ENDPOINTS = {
     "nutrition_analysis.analyze_nutrition",
     "nutrition_analysis.analyze_legacy_nutrition",
+    "food_safety.analyze_food_label_route",
 }
 
 

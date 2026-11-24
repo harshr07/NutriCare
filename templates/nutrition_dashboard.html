@@ -124,6 +124,40 @@
         <p class="muted small">Limits come from the verified rows of the project's nutrition dataset and are per day. This is a threshold check, not medical advice.</p>
     </section>
 
+    <section class="panel" id="food-safety-profile">
+        <h2>My Food Safety Profile</h2>
+        <p class="muted small">Select your health conditions and add ingredients you personally want to avoid. Allergy information is kept separate.</p>
+        <form method="post" action="{{ url_for('food_safety.save_food_safety_profile_route') }}">
+            <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
+            <h3>My health conditions</h3>
+            <div class="form-grid">
+                {% for item in food_safety_diseases %}
+                <label><input type="checkbox" name="diseases" value="{{ item.code }}" {% if item.code in food_safety_preferences.diseases %}checked{% endif %}> {{ item.label }}</label>
+                {% endfor %}
+            </div>
+            <h3>Personal avoid list</h3>
+            <label>Ingredients to avoid (comma separated)
+                <textarea name="avoid_ingredients" rows="2" placeholder="e.g. palm oil, maida, artificial sweetener">{{ food_safety_preferences.avoid_ingredients | join(', ') }}</textarea>
+            </label>
+            <h3>My allergies</h3>
+            <label>Allergens (comma separated)
+                <textarea name="allergies" rows="2" placeholder="e.g. peanut, milk, soy">{{ food_safety_preferences.allergies | join(', ') }}</textarea>
+            </label>
+            <h3>Additional CKD information (optional)</h3>
+            <label>CKD stage
+                <select name="ckd_stage"><option value="">Not specified</option>
+                    {% for stage in ['1','2','3a','3b','4','5'] %}
+                    <option value="{{ stage }}" {% if food_safety_preferences.ckd_stage == stage %}selected{% endif %}>Stage {{ stage }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <label><input type="checkbox" name="on_dialysis" value="1" {% if food_safety_preferences.on_dialysis %}checked{% endif %}> I am on dialysis</label>
+            <label><input type="checkbox" name="potassium_restricted" value="1" {% if food_safety_preferences.potassium_restricted %}checked{% endif %}> My clinician has advised potassium restriction</label>
+            <label><input type="checkbox" name="phosphorus_restricted" value="1" {% if food_safety_preferences.phosphorus_restricted %}checked{% endif %}> My clinician has advised phosphorus restriction</label>
+            <button type="submit">Save Food Safety Profile</button>
+        </form>
+    </section>
+
     <section class="panel" id="add-food">
         <h2>Add a food</h2>
         <p class="muted small">Add a meal manually without a photo, or optionally scan a packet label. Enter known nutrition values and leave the rest blank.</p>
@@ -139,8 +173,8 @@
                 <strong>Scan a nutrition label</strong>
                 <p class="muted small">Optional: choose a clear photo of the Nutrition Facts panel to scan and fill detected fields. You can also skip the photo and enter a meal below. The photo stays in this browser.</p>
             </div>
-            <label class="scan-upload" for="label-photo">Choose or capture photo</label>
-            <input id="label-photo" type="file" accept="image/*" capture="environment">
+            <label class="scan-upload" for="label-photo">Choose photos</label>
+            <input id="label-photo" type="file" accept="image/*" multiple>
             <button type="button" id="scan-label" disabled>Scan again</button>
             <p class="scan-status small" id="scan-status" role="status" aria-live="polite">No photo selected</p>
             <details class="scan-text" id="scan-text-details">
@@ -151,6 +185,8 @@
         </div>
 
         <form action="{{ url_for('nutrition.add') }}" method="post">
+            <input type="hidden" name="raw_label_text" id="raw-label-text">
+            <input type="hidden" name="csrf_token" value="{{ auth_csrf_token() }}">
             <div class="form-grid">
                 <label>Food name
                     <input name="food_name" placeholder="e.g. Roasted chana" maxlength="120" required>
@@ -197,9 +233,17 @@
                     {% endfor %}
                 </div>
             </details>
-            <label class="full-label">Ingredients (optional — as printed on the packet)
-                <textarea name="ingredients" rows="2" maxlength="500" placeholder="e.g. Chickpeas, salt, spices"></textarea>
+            <label class="full-label">Ingredients
+                <textarea name="ingredients" rows="3" maxlength="5000"></textarea>
             </label>
+            <label class="full-label">Contains (allergen declaration)
+                <textarea name="contains_text" rows="2" placeholder="e.g. Contains wheat and milk"></textarea>
+            </label>
+            <label class="full-label">May contain (cross-contact warning)
+                <textarea name="may_contain_text" rows="2" placeholder="e.g. May contain traces of peanuts"></textarea>
+            </label>
+            <button type="button" id="check-food-safety">Check suitability for my profile</button>
+            <div id="food-safety-result" aria-live="polite"></div>
             <button type="submit">Add to today's total</button>
         </form>
         <p class="muted small">Tip: If a label only reports salt (g), it is not the same unit as sodium (mg). Approximately 1 g salt = 400 mg sodium. Check the label before converting.</p>

@@ -1,0 +1,73 @@
+{
+  "metadata": {
+    "name": "NutriCare Food Safety Rules",
+    "version": "1.0",
+    "review_status": "DRAFT_NEEDS_CLINICAL_REVIEW",
+    "jurisdiction": "India",
+    "description": "Evidence-linked starter rules, not medical advice."
+  },
+  "diseases": [
+    {"code": "type2_diabetes", "label": "Type 2 Diabetes"},
+    {"code": "hypertension", "label": "Hypertension"},
+    {"code": "ckd", "label": "Chronic Kidney Disease"},
+    {"code": "cardiovascular_disease", "label": "Cardiovascular Disease"},
+    {"code": "celiac_disease", "label": "Celiac Disease"}
+  ],
+  "sources": {
+    "ICMR": "https://www.icmr.gov.in/icmrobject/custom_data/pdf/resource-guidelines/ICMR_GuidelinesType2diabetes2018_0.pdf",
+    "WHO_SODIUM": "https://www.who.int/news-room/fact-sheets/detail/salt-reduction",
+    "NIDDK_CKD": "https://www.niddk.nih.gov/health-information/kidney-disease/chronic-kidney-disease-ckd/healthy-eating-adults-chronic-kidney-disease",
+    "KDIGO_CKD": "https://doi.org/10.1016/j.kint.2023.10.016",
+    "FSSAI_CELIAC": "https://fssai.gov.in/upload/uploadfiles/files/Guidance_Note_Ver2_Gluten_Free_31_10_2019_Revised_10_02_2020.pdf",
+    "FSSAI_LABEL": "https://fssai.gov.in/upload/uploadfiles/files/Compendium_Labelling_Display_23_09_2021.pdf",
+    "WHO_TRANS_FAT": "https://www.who.int/news-room/fact-sheets/detail/trans-fat",
+    "AHA_SAT_FAT": "https://www.heart.org/en/healthy-living/healthy-eating/eat-smart/fats/saturated-fats"
+  },
+  "ingredient_aliases": {
+    "wheat": ["wheat", "wheat flour", "atta", "maida", "durum wheat", "wheat gluten"],
+    "wheat_starch": ["wheat starch"],
+    "barley": ["barley", "barley flour", "malted barley"],
+    "rye": ["rye", "rye flour"],
+    "malt_extract": ["malt extract", "barley malt", "malt syrup"],
+    "oats": ["oats", "oat flour", "oat bran"],
+    "added_sugar_sources": ["sugar", "sucrose", "glucose", "dextrose", "fructose", "jaggery", "honey", "molasses", "invert sugar", "glucose syrup", "corn syrup"],
+    "sodium_additives": ["salt", "sodium chloride", "black salt", "monosodium glutamate", "msg", "ins 621", "sodium bicarbonate", "baking soda", "sodium benzoate", "ins 211"],
+    "potassium_additives": ["potassium chloride", "potassium phosphate", "dipotassium phosphate", "ins 508"],
+    "phosphate_additives": ["phosphoric acid", "sodium phosphate", "disodium phosphate", "trisodium phosphate", "pyrophosphate", "polyphosphate", "ins 338", "ins 339", "ins 450", "ins 451", "ins 452"],
+    "partially_hydrogenated_oils": ["partially hydrogenated oil", "partially hydrogenated vegetable oil", "partially hydrogenated fat"],
+    "saturated_fat_sources": ["palm oil", "palmolein", "palm kernel oil", "coconut oil", "butter", "ghee"],
+    "milk": ["milk", "milk solids", "milk powder", "whey", "casein", "lactose"],
+    "peanut": ["peanut", "peanuts", "groundnut"],
+    "tree_nut": ["almond", "cashew", "pistachio", "walnut", "hazelnut", "tree nuts"],
+    "soy": ["soy", "soya", "soybean", "soy protein"],
+    "egg": ["egg", "egg white", "egg yolk", "albumin"],
+    "fish": ["fish", "fish oil"],
+    "crustacean": ["shrimp", "prawn", "crab", "lobster"],
+    "sulphite": ["sulphite", "sulfite", "sodium metabisulphite", "sulphur dioxide"]
+  },
+  "ingredient_rules": [
+    {"disease": "type2_diabetes", "ingredient_key": "added_sugar_sources", "status": "LIMIT", "message": "Added sugar source detected. Check the quantity and consumed portion.", "source": "ICMR"},
+    {"disease": "hypertension", "ingredient_key": "sodium_additives", "status": "TRACK", "message": "Potential sodium-containing ingredient detected. Check the sodium value on the nutrition label.", "source": "WHO_SODIUM"},
+    {"disease": "ckd", "ingredient_key": "potassium_additives", "status": "CONDITIONAL", "message": "Potassium additive detected. Relevance depends on blood potassium and clinician advice.", "source": "NIDDK_CKD"},
+    {"disease": "ckd", "ingredient_key": "phosphate_additives", "status": "CONDITIONAL", "message": "Phosphate additive detected. Check whether phosphorus restriction is part of your kidney diet.", "source": "NIDDK_CKD"},
+    {"disease": "celiac_disease", "ingredient_key": "wheat", "status": "AVOID", "message": "Wheat detected. This product is not suitable for a standard gluten-free diet.", "source": "FSSAI_CELIAC"},
+    {"disease": "celiac_disease", "ingredient_key": "barley", "status": "AVOID", "message": "Barley is a gluten-containing grain.", "source": "FSSAI_CELIAC"},
+    {"disease": "celiac_disease", "ingredient_key": "rye", "status": "AVOID", "message": "Rye is a gluten-containing grain.", "source": "FSSAI_CELIAC"},
+    {"disease": "celiac_disease", "ingredient_key": "malt_extract", "status": "CONDITIONAL", "message": "Verify the source of malt and gluten-free certification.", "source": "FSSAI_CELIAC"},
+    {"disease": "celiac_disease", "ingredient_key": "wheat_starch", "status": "CONDITIONAL", "message": "Verify gluten-free processing and product certification.", "source": "FSSAI_CELIAC"},
+    {"disease": "celiac_disease", "ingredient_key": "oats", "status": "CONDITIONAL", "message": "Verify gluten-free status and cross-contact controls.", "source": "FSSAI_CELIAC"},
+    {"disease": "cardiovascular_disease", "ingredient_key": "partially_hydrogenated_oils", "status": "AVOID", "message": "Partially hydrogenated oil detected. This is an industrial trans-fat concern.", "source": "WHO_TRANS_FAT"},
+    {"disease": "cardiovascular_disease", "ingredient_key": "saturated_fat_sources", "status": "LIMIT", "message": "This ingredient may contribute saturated fat. Check the actual nutrition value.", "source": "AHA_SAT_FAT"}
+  ],
+  "nutrient_rules": [
+    {"disease": "type2_diabetes", "nutrient": "carbs", "unit": "g", "status": "TRACK", "message": "Track carbohydrates in the amount consumed. Use an individualized carbohydrate target.", "source": "ICMR"},
+    {"disease": "type2_diabetes", "nutrient": "added_sugar", "unit": "g", "status": "LIMIT", "message": "Track and limit added sugar as part of the overall meal plan.", "source": "ICMR"},
+    {"disease": "hypertension", "nutrient": "sodium", "unit": "mg", "status": "TRACK", "reference_value": 2000, "reference_unit": "mg/day", "message": "This serving contributes to the WHO adult sodium reference. This is not an individual prescription.", "source": "WHO_SODIUM"},
+    {"disease": "ckd", "nutrient": "sodium", "unit": "mg", "status": "TRACK", "message": "Compare sodium with your clinician-set daily target.", "source": "NIDDK_CKD"},
+    {"disease": "ckd", "nutrient": "potassium", "unit": "mg", "status": "CONDITIONAL", "message": "Potassium restriction depends on kidney function, blood potassium and clinical advice.", "source": "NIDDK_CKD"},
+    {"disease": "ckd", "nutrient": "phosphorus", "unit": "mg", "status": "CONDITIONAL", "message": "Phosphorus restriction depends on blood results and clinical advice.", "source": "NIDDK_CKD"},
+    {"disease": "ckd", "nutrient": "protein", "unit": "g", "status": "CONDITIONAL", "message": "Protein requirements depend on CKD stage and dialysis status.", "source": "KDIGO_CKD"},
+    {"disease": "cardiovascular_disease", "nutrient": "saturated_fat", "unit": "g", "status": "LIMIT", "message": "Track saturated fat as part of the overall heart-healthy dietary pattern.", "source": "AHA_SAT_FAT"},
+    {"disease": "cardiovascular_disease", "nutrient": "trans_fat", "unit": "g", "status": "LIMIT", "message": "Minimize industrial and dietary trans-fat intake.", "source": "WHO_TRANS_FAT"}
+  ]
+}
