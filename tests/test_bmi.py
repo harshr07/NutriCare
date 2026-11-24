@@ -3,8 +3,8 @@
 import unittest
 import uuid
 
-import _support  # noqa: F401  (must be imported before app: isolates the databases)
-from _support import register
+import support as _support  # noqa: F401  (sets test database before importing app)
+from support import register
 from app import app
 
 

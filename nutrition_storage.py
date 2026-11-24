@@ -50,8 +50,59 @@ def get_connection():
         # Preserve legacy rows, but keep them outside every newly registered user's view.
         db.execute("ALTER TABLE nutrition_entries ADD COLUMN user_id INTEGER")
     db.execute("CREATE INDEX IF NOT EXISTS idx_nutrition_entries_user_date ON nutrition_entries(user_id, entry_date)")
+    db.execute("""
+        CREATE TABLE IF NOT EXISTS nutrition_profiles (
+            user_id INTEGER PRIMARY KEY,
+            disease TEXT NOT NULL,
+            gender TEXT NOT NULL,
+            age INTEGER NOT NULL,
+            body_weight_kg REAL,
+            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
     db.commit()
     return db
+
+
+def get_profile(user_id):
+    db = get_connection()
+    try:
+        row = db.execute("SELECT disease, gender, age, body_weight_kg FROM nutrition_profiles WHERE user_id = ?", (user_id,)).fetchone()
+        return dict(row) if row else None
+    finally:
+        db.close()
+
+
+def save_profile(user_id, profile):
+    db = get_connection()
+    try:
+        db.execute("""
+            INSERT INTO nutrition_profiles (user_id, disease, gender, age, body_weight_kg)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(user_id) DO UPDATE SET
+                disease = excluded.disease,
+                gender = excluded.gender,
+                age = excluded.age,
+                body_weight_kg = excluded.body_weight_kg,
+                updated_at = CURRENT_TIMESTAMP
+        """, (user_id, profile["disease"], profile["gender"], profile["age"], profile["body_weight_kg"]))
+        db.commit()
+    finally:
+        db.close()
+
+
+def latest_weight(user_id):
+    db = get_connection()
+    try:
+        row = db.execute(
+            "SELECT weight FROM health_logs WHERE user_id = ? AND weight IS NOT NULL ORDER BY log_date DESC LIMIT 1",
+            (user_id,),
+        ).fetchone()
+        return row["weight"] if row else None
+    except sqlite3.OperationalError:
+        return None
+    finally:
+        db.close()
 
 
 def save_entry(entry, user_id):

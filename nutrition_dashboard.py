@@ -1,7 +1,11 @@
 from datetime import date, timedelta
 import math
-from flask import Blueprint, redirect, render_template, request, session, url_for
-from nutrition_storage import NUTRIENTS, entries_from, entries_on, remove_entry, save_entry
+from flask import Blueprint, flash, redirect, render_template, request, session, url_for
+from daily_limits import available_conditions, limit_report
+from nutrition_analysis import normalize_name
+from nutrition_storage import (
+    NUTRIENTS, entries_from, entries_on, get_profile, latest_weight, remove_entry, save_entry, save_profile,
+)
 
 nutrition_bp = Blueprint("nutrition", __name__)
 
@@ -83,6 +87,30 @@ def build_entry(form):
     return entry
 
 
+def build_profile(form):
+    allowed = {item["value"] for item in available_conditions()}
+    disease = normalize_name(form.get("disease"))
+    if disease not in allowed:
+        raise ValueError("Choose your health condition from the list.")
+
+    gender = form.get("gender", "")
+    if gender not in ("male", "female"):
+        raise ValueError("Choose male or female so the right limits are used.")
+
+    try:
+        age = int(form.get("age", ""))
+    except ValueError:
+        raise ValueError("Enter your age in years.")
+    if not 1 <= age <= 120:
+        raise ValueError("Enter an age between 1 and 120.")
+
+    weight = optional_number(form.get("body_weight_kg"), "body weight")
+    if weight is not None and not 20 <= weight <= 400:
+        raise ValueError("Enter a body weight between 20 and 400 kg.")
+
+    return {"disease": disease, "gender": gender, "age": age, "body_weight_kg": weight}
+
+
 def known_totals(entries):
     # If a nutrient was never supplied, keep it unknown rather than reporting zero.
     totals = {}
@@ -92,7 +120,21 @@ def known_totals(entries):
     return totals
 
 
-def dashboard_page(day, error=None):
+def report_for(records, day):
+    user_id = session["user_id"]
+    return limit_report(
+        known_totals(records), get_profile(user_id), latest_weight(user_id), day < date.today().isoformat(),
+    )
+
+
+def exceeded_amounts(day):
+    report = report_for(entries_on(day, session["user_id"]), day)
+    if not report:
+        return {}
+    return {row["name"]: row for row in report["exceeded"]}
+
+
+def dashboard_page(day, error=None, profile_error=None):
     records = entries_on(day, session["user_id"])
     today = date.today()
     start = today - timedelta(days=6)
@@ -106,6 +148,9 @@ def dashboard_page(day, error=None):
         "nutrition_dashboard.html", records=records, totals=known_totals(records),
         nutrients=NUTRIENTS, common=COMMON, extra=EXTRA,
         selected_date=day, today=today.isoformat(), week=week, error=error,
+        conditions=available_conditions(), profile=get_profile(session["user_id"]),
+        saved_weight=latest_weight(session["user_id"]), profile_error=profile_error,
+        limit_report=report_for(records, day),
     )
 
 
@@ -120,8 +165,24 @@ def add():
         entry = build_entry(request.form)
     except ValueError as exc:
         return dashboard_page(selected_day(), str(exc)), 400
+    before = exceeded_amounts(entry["entry_date"])
     save_entry(entry, session["user_id"])
+    for name, row in exceeded_amounts(entry["entry_date"]).items():
+        if name not in before or row["amount"] > before[name]["amount"]:
+            flash("Warning: {} is now {} {} for {}, over your daily limit ({}).".format(
+                name, row["value"], row["unit"], entry["entry_date"], row["range_text"]), "error")
     return redirect(url_for("nutrition.dashboard", date=entry["entry_date"]))
+
+
+@nutrition_bp.route("/health/nutrition/profile", methods=["POST"])
+def save_condition():
+    try:
+        profile = build_profile(request.form)
+    except ValueError as exc:
+        return dashboard_page(selected_day(), profile_error=str(exc)), 400
+    save_profile(session["user_id"], profile)
+    flash("Your health condition was saved. Daily limits are checked every time you add a food.", "success")
+    return redirect(url_for("nutrition.dashboard", date=selected_day()) + "#condition")
 
 
 @nutrition_bp.route("/health/nutrition/delete/<int:entry_id>", methods=["POST"])
