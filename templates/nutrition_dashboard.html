@@ -32,7 +32,7 @@
     </section>
 
     <section class="panel">
-        <h2>Today's nutrition so far</h2>
+        <h2>{% if selected_date == today %}Today's nutrition so far{% else %}Nutrition for {{ selected_date }}{% endif %}</h2>
         <p class="muted small">Known amounts from your logged foods only. Unreported nutrients show a dash (—), not zero.</p>
         <div class="summary-grid">
             {% for key in ['calories', 'protein', 'carbs', 'fat'] %}
@@ -51,22 +51,18 @@
                 <strong>{{ totals[key] if totals[key] is not none else '—' }} {{ nutrients[key][1] if totals[key] is not none else '' }}</strong>
             </div>
             {% endfor %}
-            <div class="nutrient-item">
-                <span>Recorded food spending</span>
-                <strong>{{ '₹' ~ totals.cost_rupees if totals.cost_rupees is not none else '—' }}</strong>
-            </div>
         </div>
     </section>
 
     <section class="panel" id="add-food">
         <h2>Add a food</h2>
-        <p class="muted small">For a packet, enter exactly what the label says. For rice/dal/sabzi, use verified nutritional values for a defined serving. Leave unknown values blank.</p>
+        <p class="muted small">Add a meal manually without a photo, or optionally scan a packet label. Enter known nutrition values and leave the rest blank.</p>
         {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
 
         <div class="label-scanner" id="label-scanner">
             <div>
                 <strong>Scan a nutrition label</strong>
-                <p class="muted small">Choose a clear photo of the Nutrition Facts panel. It will scan automatically and fill detected fields; text stays in this browser.</p>
+                <p class="muted small">Optional: choose a clear photo of the Nutrition Facts panel to scan and fill detected fields. You can also skip the photo and enter a meal below. The photo stays in this browser.</p>
             </div>
             <label class="scan-upload" for="label-photo">Choose or capture photo</label>
             <input id="label-photo" type="file" accept="image/*" capture="environment">
@@ -104,12 +100,6 @@
                 </label>
                 <label id="serving-group" class="hidden">One serving weighs (grams)
                     <input type="number" name="serving_g" id="serving-size" min="0.1" max="10000" step="any" placeholder="e.g. 30">
-                </label>
-                <label>Price of portion eaten (₹) — optional
-                    <input type="number" name="cost_rupees" min="0" step="any" placeholder="e.g. 15">
-                </label>
-                <label>Label / data source — optional
-                    <input name="source" placeholder="e.g. Product label, IFCT table" maxlength="200">
                 </label>
             </div>
 
@@ -149,7 +139,19 @@
                 <tbody>
                     {% for entry in records %}
                     <tr>
-                        <td><strong>{{ entry.food_name }}</strong><small>{{ entry.food_type }}</small></td>
+                        <td>
+                            <strong>{{ entry.food_name }}</strong><small>{{ entry.food_type }}</small>
+                            <details class="entry-details">
+                                <summary>View ingredients and all nutrients</summary>
+                                <p><strong>Ingredients:</strong> {{ entry.ingredients if entry.ingredients else 'Not provided' }}</p>
+                                <p><strong>Nutrition basis:</strong> {{ 'Per serving' if entry.label_basis == 'serving' else 'Per 100 g' }}{% if entry.serving_g is not none %} · serving {{ entry.serving_g }} g{% endif %}</p>
+                                <div class="entry-nutrients">
+                                    {% for field, (label, unit) in nutrients.items() %}
+                                    <div><span>{{ label }}</span><strong>{{ entry[field] if entry[field] is not none else '—' }}{% if entry[field] is not none %} {{ unit }}{% endif %}</strong></div>
+                                    {% endfor %}
+                                </div>
+                            </details>
+                        </td>
                         <td>{{ entry.quantity_g }} g</td>
                         <td>{{ entry.calories if entry.calories is not none else '—' }}</td>
                         <td>{{ entry.protein if entry.protein is not none else '—' }}{% if entry.protein is not none %} g{% endif %}</td>
@@ -171,9 +173,16 @@
     </section>
 
     <section class="panel">
-        <h2>Calories recorded over the last 7 days</h2>
-        <p class="muted small">Days without calorie data are left blank, not shown as zero.</p>
-        <div class="chart-area"><canvas id="week-chart" aria-label="Weekly logged calories"></canvas></div>
+        <h2>Nutrition recorded over the last 7 days</h2>
+        <p class="muted small">Choose a nutrient to review. Days without a value are left blank, not shown as zero.</p>
+        <label class="history-metric-label" for="history-nutrient">Show history for
+            <select id="history-nutrient">
+                {% for field, (label, unit) in nutrients.items() %}
+                <option value="{{ field }}">{{ label }} ({{ unit }})</option>
+                {% endfor %}
+            </select>
+        </label>
+        <div class="chart-area"><canvas id="week-chart" aria-label="Weekly nutrition history"></canvas></div>
         <div id="chart-fallback" class="muted small hidden">Chart is unavailable offline. You can still view your daily totals by selecting a date above.</div>
     </section>
     <p class="muted small">NutriCare provides estimated nutrition information, not medical advice. Missing food entries or missing vitamins make daily totals incomplete.</p>

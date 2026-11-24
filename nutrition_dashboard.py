@@ -66,11 +66,11 @@ def build_entry(form):
         "food_name": name,
         "food_type": food_type,
         "ingredients": form.get("ingredients", "").strip()[:500],
-        "source": form.get("source", "").strip()[:200],
+        "source": None,
         "quantity_g": quantity,
         "label_basis": basis,
         "serving_g": serving if basis == "serving" else None,
-        "cost_rupees": optional_number(form.get("cost_rupees"), "food cost"),
+        "cost_rupees": None,
     }
     has_nutrition = False
     for field, (label, unit) in NUTRIENTS.items():
@@ -89,8 +89,6 @@ def known_totals(entries):
     for field in NUTRIENTS:
         values = [item[field] for item in entries if item[field] is not None]
         totals[field] = round(sum(values), 2) if values else None
-    prices = [item["cost_rupees"] for item in entries if item["cost_rupees"] is not None]
-    totals["cost_rupees"] = round(sum(prices), 2) if prices else None
     return totals
 
 
@@ -103,7 +101,7 @@ def dashboard_page(day, error=None):
     for i in range(7):
         d = start + timedelta(days=i)
         daily = [entry for entry in week_records if entry["entry_date"] == d.isoformat()]
-        week.append({"date": d.strftime("%a %d"), "calories": known_totals(daily)["calories"]})
+        week.append({"date": d.strftime("%a %d"), "nutrients": known_totals(daily)})
     return render_template(
         "nutrition_dashboard.html", records=records, totals=known_totals(records),
         nutrients=NUTRIENTS, common=COMMON, extra=EXTRA,

@@ -177,14 +177,24 @@ const chartData = document.getElementById('week-data');
 const chartCanvas = document.getElementById('week-chart');
 if (chartData && chartCanvas && window.Chart) {
   const week = JSON.parse(chartData.textContent);
-  new Chart(chartCanvas, {
+  const historySelect = document.getElementById('history-nutrient');
+  const historyChart = new Chart(chartCanvas, {
     type: 'bar',
     data: {
       labels: week.map(day => day.date),
-      datasets: [{label: 'Calories (kcal)', data: week.map(day => day.calories), backgroundColor: '#71b38a'}]
+      datasets: [{label: 'Calories (kcal)', data: week.map(day => day.nutrients.calories), backgroundColor: '#71b38a'}]
     },
     options: {responsive: true, scales: {y: {beginAtZero: true}}}
   });
+
+  function updateHistoryChart() {
+    const field = historySelect.value;
+    historyChart.data.datasets[0].label = historySelect.selectedOptions[0].textContent;
+    historyChart.data.datasets[0].data = week.map(day => day.nutrients[field]);
+    historyChart.update();
+  }
+
+  historySelect.addEventListener('change', updateHistoryChart);
 }
 
 if (!window.Tesseract) {
